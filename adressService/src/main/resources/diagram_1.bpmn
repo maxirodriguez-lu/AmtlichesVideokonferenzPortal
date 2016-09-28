@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.3.2">
+  <bpmn:process id="addresse_eingeben" name="Adresseingabe" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Adressdaten eingegangen">
+      <bpmn:outgoing>SequenceFlow_0gr9e1l</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0gr9e1l" sourceRef="StartEvent_1" targetRef="Task_156m0i2" />
+    <bpmn:sequenceFlow id="SequenceFlow_1fqbrbe" sourceRef="Task_156m0i2" targetRef="Task_0vkplis" />
+    <bpmn:sequenceFlow id="SequenceFlow_0poashe" sourceRef="Task_0vkplis" targetRef="EndEvent_02abvr2" />
+    <bpmn:endEvent id="EndEvent_02abvr2" name="Koordinaten errechnet">
+      <bpmn:incoming>SequenceFlow_0poashe</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_156m0i2" name="Daten eingeben" camunda:assignee="john">
+      <bpmn:incoming>SequenceFlow_0gr9e1l</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1fqbrbe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_0vkplis" name="Koordinaten errechnen" camunda:class="org.trx.adressService.remote.coord">
+      <bpmn:incoming>SequenceFlow_1fqbrbe</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0poashe</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="addresse_eingeben">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="173" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="158" y="138" width="66" height="25" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0gr9e1l_di" bpmnElement="SequenceFlow_0gr9e1l">
+        <di:waypoint xsi:type="dc:Point" x="209" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="299" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="254" y="105" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1fqbrbe_di" bpmnElement="SequenceFlow_1fqbrbe">
+        <di:waypoint xsi:type="dc:Point" x="399" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="505" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="452" y="105" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0poashe_di" bpmnElement="SequenceFlow_0poashe">
+        <di:waypoint xsi:type="dc:Point" x="605" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="699" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="652" y="105" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_02abvr2_di" bpmnElement="EndEvent_02abvr2">
+        <dc:Bounds x="699" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="686" y="138" width="63" height="25" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_0q1y99q_di" bpmnElement="Task_156m0i2">
+        <dc:Bounds x="299" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1onajah_di" bpmnElement="Task_0vkplis">
+        <dc:Bounds x="505" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
