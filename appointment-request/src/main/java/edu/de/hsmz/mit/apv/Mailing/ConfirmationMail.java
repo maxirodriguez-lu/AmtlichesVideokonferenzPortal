@@ -16,7 +16,7 @@ public class ConfirmationMail implements JavaDelegate {
 	public void execute(DelegateExecution execution) throws Exception {
 		DateFormat dateFormatDE = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.GERMAN);
 		Calendar webExStartDate = Calendar.getInstance(Locale.GERMAN);
-		webExStartDate.add(Calendar.MINUTE, 15);
+		webExStartDate.add(Calendar.MINUTE, 1);
 		
 		LOGGER.info("Sending Confirmation-Mail ... '\n");
 		LOGGER.info(">>> Mail-Adresse: " + execution.getVariable("email") + " '\n");
@@ -24,7 +24,7 @@ public class ConfirmationMail implements JavaDelegate {
 		LOGGER.info(">>> Date: " + webExStartDate.getTime().toString() + " '\n");
 		
 		execution.setVariable("webExStartDateString", dateFormatDE.format(webExStartDate.getTime()));
-		execution.setVariable("webExStartDate", "PT15M");
+		execution.setVariable("webExStartDate", "PT1M");
 	}
 
 }
