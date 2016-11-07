@@ -17,7 +17,6 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-import connectjar.org.apache.http.util.ExceptionUtils;
 
 public class SessionStarter implements JavaDelegate {
 
@@ -55,14 +54,14 @@ public class SessionStarter implements JavaDelegate {
 			ClientResponse response = webResource.type("application/json").post(ClientResponse.class, json.toString());
 
 			if (response.getStatus() != 200) {
-				LOGGER.severe(">>> FEHLER BEIM AUFRUF: " + response);
+				LOGGER.info(">>> FEHLER BEIM AUFRUF: " + response);
 				throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
 			}
 
 			LOGGER.info("Antwort von Zoom:");
 			LOGGER.info(response.getEntity(String.class));
 		} catch (Exception e) {
-			LOGGER.severe(Arrays.toString(e.getStackTrace()));
+			LOGGER.info(Arrays.toString(e.getStackTrace()));
 		}
 	}
 

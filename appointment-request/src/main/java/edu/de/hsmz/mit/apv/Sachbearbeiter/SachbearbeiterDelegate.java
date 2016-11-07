@@ -22,11 +22,6 @@ public class SachbearbeiterDelegate implements JavaDelegate {
 		IdentityService identityService = processEngine.getIdentityService();
 		
 		List<User> userList = identityService.createUserQuery().memberOfGroup("Sachbearbeiter").list();
-		LOGGER.info("Liste of Users in Group 'Sachbearbeiter':");
-		for(User user: userList){
-			LOGGER.info(user.getFirstName() + " " + user.getLastName());
-		}
-		
 		long selectUser = Math.round(1 + Math.random() * (userList.size()-2));
 		User selectedUser = userList.get((int) selectUser);
 		LOGGER.info("Selecting User: " + selectedUser.getFirstName() + " " + selectedUser.getLastName());
