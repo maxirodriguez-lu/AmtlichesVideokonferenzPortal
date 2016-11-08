@@ -1,0 +1,47 @@
+<form role="form" name="requestAppointmentConfirmationCancellation">
+	<!--
+	<script cam-script type="text/form-script">
+    	camForm.on('form-loaded', function() {
+      		camForm.variableManager.fetchVariable('Meeting_start_url');
+    	});
+    	camForm.on('variables-restored', function() {
+      		$scope.Meeting_start_url_call = camForm.variableManager.variableValue('Meeting_start_url');
+		});
+    </script>
+    -->
+    
+	<div class="control-group">
+		<label class="control-label">Meeting beitreten</label>
+		<p></p>
+		<p>Über den Aufruf der Url wird das Meeting gestartet.</p>
+		<div class="controls">
+			<input id="Meeting_start_url"
+				   type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Meeting_start_url" 
+				   name="Meeting_start_url" 
+				   readonly/>
+		</div>
+		<p></p>
+		<p><a class="btn btn-primary ng-binding" ng-href="{{Meeting_start_url}}" target="_blank">Dem Meeting beitreten ...</a></p>
+		<p></p>
+	</div>
+	<br>
+	<br>
+	<br>
+	<div class="form-group">
+		<label for="Meeting_Status_Ende">Meeting beenden</label> 
+		<p></p>
+		<p>Das Meeting als beendet kennzeichnen und die Prozess-Instanz abschließen.</p>
+		<p></p>
+		<select
+			cam-variable-name="Meeting_Status_Ende" 
+			cam-variable-type="Integer"
+			class="form-control" required>
+			<option value=2>Termin hat nicht stattgefunden, Teilnehmer nicht erschiehnen</option>
+			<option value=1>Termin hat nicht stattgefunden, Sachbearbeiter nicht erschiehnen</option>
+			<option value=0>Termin hat stattgefunden, Meeting beendet</option>
+		</select>
+	</div>
+</form>
