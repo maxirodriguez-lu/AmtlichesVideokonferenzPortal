@@ -1145,14 +1145,14 @@ p {
 }
 
 .modal-heading {
-  padding: 40px;
+  padding: 20px 40px 30px;
 }
 
 .modal-field {
   display: block;
   width: 250px;
   margin-right: auto;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   margin-left: auto;
 }
 
@@ -1169,9 +1169,9 @@ p {
 
 .success-alert {
   display: none;
+  margin-top: 35px;
   border: 1px solid #30ad64;
   border-radius: 20px;
-  margin-top:35px;
 }
 
 .success-heading {
@@ -1188,7 +1188,7 @@ p {
 
 .fail-alert {
   display: none;
-  margin-top:35px;
+  margin-top: 35px;
 }
 
 .fail-box {
@@ -1337,4 +1337,3 @@ html.w-mod-js *[data-ix="modal-load"] {
     width: 35%;
   }
 }
-

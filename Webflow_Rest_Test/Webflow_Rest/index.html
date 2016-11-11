@@ -130,6 +130,8 @@
 			<div id="w-form-anfrage" class="w-form">
 				<form data-name="Email Form" id="email-form" name="email-form">
 					<h2 class="modal-heading">Terminanfrage</h2>
+					<select class="modal-field w-select" data-name="Sachbearbeiter-Id" id="Sachbearbeiter-Id" name="Sachbearbeiter-Id" required="required">
+		          	</select>
 					<input class="modal-field w-input" data-name="Email" id="email"
 						maxlength="256" name="email" placeholder="Ihre Emailadresse …"
 						required="required" type="email"> <input
@@ -161,20 +163,140 @@
 		type="text/javascript"></script>
 	<script src="js/webflow.js" type="text/javascript"></script>
 	<script>
+	var host = "10.32.3.26";
+	
+	$( "#konferenz-planen-button" ).click(function( event ){
+  	  	
+  	  	$( "#fail-alert-anfrage" ).hide( "fast" );
+		$( "#success-alert-anfrage" ).hide( "fast" );
+      	$( "#w-form-anfrage" ).show( "fast" );
+  		
+  		$( '#Sachbearbeiter-Id' ).find('option').remove().end();
+      	
+		$.ajax({
+  	    	headers: { 
+  	    	    "Accept": "application/json",
+  	        	"Content-Type": "application/json"
+  	    	},
+  		  	url: "http://" + host + ":8080/engine-rest/process-definition/key/data-request/start",
+  	    	type: "POST",
+  	    	dataType: "json",
+  	    	data: "{\"variables\": {}}"
+  		})
+  		  .fail(function(data){
+    		$( "#fail-alert-anfrage" ).show( "slow" );
+      		$( "#w-form-anfrage" ).hide( "slow" );
+    		
+    		if ( console && console.log ) {
+    	  		console.log( data );
+    	  	}
+  		  })
+  		  .done(function( data ) {
+    		var processID = data.id;
+    		    
+  		    if ( console && console.log ) {
+  		    	console.log( data );
+  		    	
+  		    	if(processID){
+  		    		console.log( "Generated Process with id: " + processID.toString() );
+  		    	}
+  		    }
+  		    
+  		  $.ajax({
+	  	    	headers: { 
+	  	    	    "Accept": "application/json",
+	  	        	"Content-Type": "application/json"
+	  	    	},
+	  		  	url: "http://" + host + ":8080/engine-rest/process-instance/"+ processID + "/variables/payload",
+	  	    	type: "GET"
+	  	    })
+	  		  .fail(function(data){
+	    		$( "#fail-alert-anfrage" ).show( "slow" );
+	      		$( "#w-form-anfrage" ).hide( "slow" );
+	    		
+	    		if ( console && console.log ) {
+	    	  		console.log( data );
+	    	  	}
+	  		  })
+	  		  .done(function( data ) {
+  				if ( console && console.log ) {
+	  		    	console.log( data );
+	  		    	
+		  			var payLoad = jQuery.parseJSON(data.value);
+		  			var users = payLoad.Users[0];
+	  		    	
+	  		    	if(users){
+	  		    		for(user of users){
+	  		    			if(user){
+	  		    				if(user.Id){
+	  		    					if(Array.isArray(user.Id)){
+	  		    						console.log( user.Id[0] );
+
+				  	  		    	    $( '#Sachbearbeiter-Id' ).append($('<option/>', { 
+				  	  		    	        value: user.Id[0],
+				  	  		    	        text : user.FirstName[0] + " " + user.LastName[0] 
+				  	  		    	    }));
+	  		    					}else{
+			  	  		    			console.log( user.Id );
+
+				  	  		    	    $( '#Sachbearbeiter-Id' ).append($('<option/>', { 
+				  	  		    	        value: user.Id,
+				  	  		    	        text : user.FirstName + " " + user.LastName 
+				  	  		    	    }));
+	  		    					}
+	  		    				}else{
+		  	  		    			console.log( "UserID for User '" + user + "' could not be read!" );
+		  	  		    			$( "#fail-alert-anfrage" ).show( "slow" );
+		  	  	      				$( "#w-form-anfrage" ).hide( "slow" );
+	  		    				}
+	  		    			}else{
+	  	  		    			console.log( "UserID corrupt!" );
+	  	  		    			$( "#fail-alert-anfrage" ).show( "slow" );
+	  	  	      				$( "#w-form-anfrage" ).hide( "slow" );
+  		    				}
+	  		    		}
+	  		    	}else{
+	  		    		console.log( "No Users available!" );
+	  		    		$( "#fail-alert-anfrage" ).show( "slow" );
+  	  	      			$( "#w-form-anfrage" ).hide( "slow" );
+	  		    	}
+	  		    }	
+	  		  })
+	  		  .always(function() {
+	    		if ( console && console.log ) {
+	    			console.log( "Funktionsaufruf beendet!" );
+	    		}
+	    	  });
+  		    
+  		    })
+  		  .always(function() {
+    		if ( console && console.log ) {
+    			console.log( "Funktionsaufruf beendet!" );
+    		}
+    	  });
+	});
+	
   	$( "#anfrageSenden-button" ).click(function( event ) {
-  	  	event.preventDefault();
+  	  event.preventDefault();
   	  	
   	  var emailAdress = $( "#email" ).val();
+  	  var assignee_Req = $( "#Sachbearbeiter-Id" ).val();
   	  
   	  $.ajax({
   	    	headers: { 
   	    	    "Accept": "application/json",
   	        	"Content-Type": "application/json"
   	    	},
-  		  	url: "http://localhost:8080/engine-rest/process-definition/key/appointment-request/start",
+  		  	url: "http://" + host + ":8080/engine-rest/process-definition/key/appointment-request/start",
   	    	type: "POST",
   	    	dataType: "json",
-  	    	data: "{\"variables\": {\"email\": {\"value\":\"" + emailAdress + "\",\"type\":\"String\"},\"Assignee_Calc\": {\"value\":\"\", \"type\":\"String\"}}}"
+  	    	data: "{" + 
+  	    			"\"variables\": {" + 
+  	    					"\"email\": {\"value\":\"" + emailAdress + "\",\"type\":\"String\"}," + 
+  	    					"\"Assignee_Req\": {\"value\":\"" + assignee_Req + "\", \"type\":\"String\"}," + 
+  	    					"\"Assignee_Calc\": {\"value\":\"\", \"type\":\"String\"}" + 
+  	    			"}" + 
+  	    		  "}"
   		})
   		  .fail(function(data){
     		$( "#fail-alert-anfrage" ).show( "slow" );
@@ -197,16 +319,6 @@
     			console.log( "Funktionsaufruf beendet!" );
     		}
     	  });
-  	});
-  	
-
-  	$( "#konferenz-planen-button" ).click(function( event ) {
-  	  	event.preventDefault();
-  	  	
-  	  	$( "#fail-alert-anfrage" ).hide( "fast" );
-		$( "#success-alert-anfrage" ).hide( "fast" );
-      	$( "#w-form-anfrage" ).show( "fast" );
-      		
   	});
   </script>
 	<!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
