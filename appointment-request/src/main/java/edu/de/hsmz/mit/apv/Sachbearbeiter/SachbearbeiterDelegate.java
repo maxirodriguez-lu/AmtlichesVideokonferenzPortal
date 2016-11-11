@@ -21,10 +21,22 @@ public class SachbearbeiterDelegate implements JavaDelegate {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 		IdentityService identityService = processEngine.getIdentityService();
 		
+		String requestedUserId = (String) execution.getVariable( "Assignee_Req" );
+		LOGGER.info(">>> Requested Sachbearbeiter: " + requestedUserId);
+		LOGGER.info(">>> Checking Sachbearbeiter ...");
+		
 		List<User> userList = identityService.createUserQuery().memberOfGroup("Sachbearbeiter").list();
-		long selectUser = Math.round(1 + Math.random() * (userList.size()-2));
-		User selectedUser = userList.get((int) selectUser);
-		LOGGER.info("Selecting User: " + selectedUser.getFirstName() + " " + selectedUser.getLastName());
+		User selectedUser = null;
+		for(User user: userList){
+			if(user.getId().equalsIgnoreCase(requestedUserId)){
+				selectedUser = user;
+			}
+		}
+		if(selectedUser != null){
+			LOGGER.info("Selecting User: " + selectedUser.getFirstName() + " " + selectedUser.getLastName());
+		}else{
+			LOGGER.warning("Requested User not found - no User will be set. Task needs to be claimed!");
+		}
 		
 		execution.setVariable("Assignee_Calc", selectedUser.getId());
 	}
