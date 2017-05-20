@@ -1,61 +1,35 @@
 package edu.de.hsmz.mit.avp.requestHandler;
 
-import java.util.List;
-
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.ProcessEngines;
-import org.camunda.bpm.engine.history.HistoricDetail;
-import org.camunda.bpm.engine.history.HistoricVariableInstance;
-import org.camunda.bpm.engine.runtime.Incident;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
+import javax.ws.rs.core.UriInfo;
 
 @Path("/request")
 public class Facade {
 
-	@GET
+	@POST
 	@Path("/appointment")
 	public Response handleAppointment() {
-		try{
-			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("appointment-request");
-
-			return Response.status(200).entity("Appointment-Request received").build();
-		}catch(Exception e){
-			return Response.status(404).entity("Fehler beim Aufruf des Services 'appointment-request'!").build();
-		}
+		return AppointmentHandler.handleRequest();
 	}
 	
 	@GET
-	@Path("/data")
-	public Response handleData() {
-		String payLoad = "";
-//		try{
-			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("data-request");
-			
-			if(instance.isEnded()){
-				   List<HistoricVariableInstance> historicVariableInstance = processEngine
-						   											.getHistoryService()
-						   											.createHistoricVariableInstanceQuery()
-						   											.processInstanceId(instance.getId())
-						   											.list();
-				   for(HistoricVariableInstance hvi: historicVariableInstance){
-					   if(hvi.getName().equalsIgnoreCase("payload")){
-						   payLoad = (String) hvi.getValue();
-					   }
-					   System.out.println(payLoad);
-				   }
-			}else{
-				payLoad = (String) processEngine.getRuntimeService().getVariable(instance.getId(), "payLoad");
-				System.out.println(payLoad);
-			}
-			return Response.status(200).entity(payLoad).build();
-//		}catch(Exception e){
-//			return Response.status(404).entity("Fehler beim Aufruf des Services 'data-request'!").build();
-//		}
+	@Path("/getData/{objectType}")
+	public Response handleRead(@PathParam("objectType") final String objectType, @Context UriInfo info) {		
+		return DataHandler.handleDataReadRequest(objectType, info);
 	}
+	
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/setData/{objectType}")
+	public Response handleWrite(@PathParam("objectType") final String objectType, @Context UriInfo info, String payLoad){
+		return DataHandler.handleDataWriteRequest(objectType, info, payLoad);	
+	}
+	
 }

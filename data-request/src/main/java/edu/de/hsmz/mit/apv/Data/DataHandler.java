@@ -1,51 +1,78 @@
 package edu.de.hsmz.mit.apv.Data;
 
-import java.util.List;
 import java.util.logging.Logger;
 
-import org.camunda.bpm.engine.IdentityService;
-import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.ProcessEngines;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.identity.User;
-import org.camunda.bpm.engine.impl.util.json.JSONObject;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import edu.de.hsmz.mit.avp.dataHandler.model.RequestData;
+import edu.de.hsmz.mit.avp.dataHandler.model.STATUSENUM;
+import edu.de.hsmz.mit.avp.databaseHandler.Facade;
 
 public class DataHandler implements JavaDelegate{
 
 	private final static Logger LOGGER = Logger.getLogger("DATA-REQUESTS");
-	private final static String userGroup = "Sachbearbeiter";
 	
 	@SuppressWarnings("unchecked")
 	public void execute(DelegateExecution execution) throws Exception {
 		
-		LOGGER.info(">>> Datarequest received!");
-
-		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-		IdentityService identityService = processEngine.getIdentityService();
-
-		JSONObject payLoad = new JSONObject();
+		//Aufruf einer fachlichen Klasse --> Ergebnis in fachliche Welt speichern
+		JSONArray result = null;
+		STATUSENUM status = STATUSENUM.NA;
 		
-		List<User> userList = identityService.createUserQuery().memberOfGroup(userGroup).list();
-		if(userList.size() > 0){
-			JSONArray userArray = new JSONArray();
-			payLoad.append("Users", userArray);
+		Facade databaseHandler = null;
+		LOGGER.info(">>> Datarequest received!");
+		
+		//ID ermitteln
+		long id = (long) execution.getVariable("FachlicheID");
+		LOGGER.info(">>> ID found: " + id);
+		
+		try{
+			//Zugehörigen Eintrag aus der fachlichen Datenbank auslesen
+			databaseHandler = new Facade();
+			RequestData req = databaseHandler.getRequestData(id);
 			
-			for(User u: userList){
-				JSONObject user = new JSONObject();
-				user.append("FirstName", u.getFirstName());
-				user.append("LastName", u.getLastName());
-				user.append("Email", u.getEmail());
-				user.append("Id", u.getId());
-				
-				userArray.add(user);
+			//Anhand der Daten prüfen, welche Funktion ausgeführt werden soll
+			
+			switch (req.getAction()) {
+				case READ:
+					
+					switch(req.getTyp()){
+						case BERATER:
+							result = databaseHandler.getSachbearbeiter();
+							status = STATUSENUM.OKAY;
+							break;
+						case SERVICEKATEGORIEN:
+							result = databaseHandler.getServicekategorien();
+							status = STATUSENUM.OKAY;
+							break;
+					}
+					
+					break;
+			case ADD:
+				break;
+			case DELETE:
+				break;
+			case UPDATE:
+				break;
+			default:
+				break;
 			}
-		}else{
-			throw new RuntimeException(String.format("Es sind keine Anwender in der Gruppe '%s' vorhanden!", userGroup));
+		}catch(Exception e){
+			status = STATUSENUM.ERROR;
+			
+			result = new JSONArray();
+			JSONObject error = new JSONObject();
+			error.put("ERRORCODE", e.getMessage());
+			result.add(error);
+		}finally{
+			//Ergebnis in die fachl. Datenbank loggen
+			if(databaseHandler == null) databaseHandler = new Facade();
+			databaseHandler.logResponse(status, result, id);
 		}
 		
-		execution.setVariable("payload", payLoad.toString());
 	}
 
 }
