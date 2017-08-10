@@ -24,6 +24,14 @@ public class Facade {
 	public Response handleRead(@PathParam("objectType") final String objectType, @Context UriInfo info) {		
 		return DataHandler.handleDataReadRequest(objectType, info);
 	}
+
+	
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/getData/{objectType}")
+	public Response handleReadWithPayload(@PathParam("objectType") final String objectType, @Context UriInfo info, String payLoad) {		
+		return DataHandler.handleDataReadRequest(objectType, info, payLoad);
+	}
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)

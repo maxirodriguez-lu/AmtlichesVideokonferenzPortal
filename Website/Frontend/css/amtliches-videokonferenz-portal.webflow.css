@@ -286,18 +286,17 @@ p {
 }
 
 .hero-section.centered.herosectionservicecategorie {
-  background-image: url('../images/example-bg.png');
   background-position: 50% 100%;
   background-size: cover;
   background-repeat: repeat;
   background-attachment: fixed;
   opacity: 1;
-  text-shadow: 0 -1px 3px hsla(0, 0%, 100%, .25), 1px 1px 6px #000;
+  text-shadow: 0 -1px 3px hsla(0, 0%, 100%, .25), 5px 5px 8px #000;
 }
+
 
 .hero-section.centered.herosectionservice {
   background-color: rgba(0, 152, 255, .24);
-  background-image: url('../images/example-bg.png');
   background-position: 50% 100%;
   background-size: cover;
   background-attachment: fixed;

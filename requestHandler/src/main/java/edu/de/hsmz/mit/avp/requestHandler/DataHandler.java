@@ -24,48 +24,7 @@ import edu.de.hsmz.mit.avp.requestHandler.Errors.MissingParameterException;
 public class DataHandler {
 
 	public static Response handleDataReadRequest(String objektTyp, UriInfo info){
-		Response resp = null;
-		
-		try{
-			String requestingUser = checkAndGetInputParameter(info, "user");
-			
-			//Eintrag in fach. Datenbank anlegen
-			Request req = new Request(UUID.randomUUID(), 
-									  requestingUser, 
-									  new Timestamp(System.currentTimeMillis()), 
-									  REQUESTACTIONENUM.fromString("Read"), 
-									  REQUESTTYPEENUM.fromString(objektTyp), 
-									  null, 
-									  info.getRequestUri().toString());
-			
-			//Eingang loggen
-			long id = Facade.logRequest(req);
-			
-			HashMap<String, Object> processParams = new HashMap<String, Object>();
-			processParams.put("FachlicheID", id);
-			
-			//Prozess anlegen, ID übergeben und starten
-			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("data-request",processParams);
-			
-			//Warten bis Prozess beendet ist
-			while(!instance.isEnded()){
-				Thread.sleep(100);
-			}
-			LoggedResponse loggedResponse = Facade.getReponse(id);
-			
-			//Ergebnisse aus der fachlichen Datenbank auslesen
-			if (loggedResponse != null && loggedResponse.getStatus() != null && loggedResponse.getStatus().equals(STATUSENUM.OKAY)){
-				resp = Response.status(200).entity(loggedResponse.getPayLoad().toJSONString()).build();
-			}
-			else{
-				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request'!").build();
-			}
-		}catch(Exception e){
-			resp = Response.status(404).entity(e.getMessage()).build();
-		}
-		
-		return resp;
+		return handleDataReadRequest(objektTyp, info, null);
 	}
 	
 	private static String checkAndGetInputParameter(UriInfo info, String paramName) throws MissingParameterException{
@@ -115,6 +74,51 @@ public class DataHandler {
 			}else if(loggedResponse != null && loggedResponse.getStatus() != null && loggedResponse.getStatus().equals(STATUSENUM.NA)){
 				resp = Response.status(418).entity("Funktion noch nicht vollständig implementiert'!").build();
 			}else{
+				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request'!").build();
+			}
+		}catch(Exception e){
+			resp = Response.status(404).entity(e.getMessage()).build();
+		}
+		
+		return resp;
+	}
+
+	public static Response handleDataReadRequest(String objectType, UriInfo info, String payLoad) {
+		Response resp = null;
+		
+		try{
+			String requestingUser = checkAndGetInputParameter(info, "user");
+			
+			//Eintrag in fach. Datenbank anlegen
+			Request req = new Request(UUID.randomUUID(), 
+									  requestingUser, 
+									  new Timestamp(System.currentTimeMillis()), 
+									  REQUESTACTIONENUM.fromString("Read"), 
+									  REQUESTTYPEENUM.fromString(objectType), 
+									  payLoad != null && payLoad.length() > 0 ? (JSONObject) new JSONParser().parse(payLoad) : null, 
+									  info.getRequestUri().toString());
+			
+			//Eingang loggen
+			long id = Facade.logRequest(req);
+			
+			HashMap<String, Object> processParams = new HashMap<String, Object>();
+			processParams.put("FachlicheID", id);
+			
+			//Prozess anlegen, ID übergeben und starten
+			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("data-request",processParams);
+			
+			//Warten bis Prozess beendet ist
+			while(!instance.isEnded()){
+				Thread.sleep(100);
+			}
+			LoggedResponse loggedResponse = Facade.getReponse(id);
+			
+			//Ergebnisse aus der fachlichen Datenbank auslesen
+			if (loggedResponse != null && loggedResponse.getStatus() != null && loggedResponse.getStatus().equals(STATUSENUM.OKAY)){
+				resp = Response.status(200).entity(loggedResponse.getPayLoad().toJSONString()).build();
+			}
+			else{
 				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request'!").build();
 			}
 		}catch(Exception e){

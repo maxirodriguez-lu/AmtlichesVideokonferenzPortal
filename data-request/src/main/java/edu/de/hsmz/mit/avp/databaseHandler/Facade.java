@@ -1,7 +1,7 @@
 package edu.de.hsmz.mit.avp.databaseHandler;
 
+import java.io.IOException;
 import java.io.StringReader;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +13,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import org.camunda.bpm.engine.impl.digest._apacheCommonsCodec.Base64;
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -208,6 +208,104 @@ public class Facade {
 			result.put("ERRORCODE", e.getMessage());
 			results.add(result);
 			
+	        throw new RuntimeException(e.getMessage());
+		} 
+	}
+
+	
+
+	@SuppressWarnings("unchecked")
+	public JSONArray getServiceEinzeldaten(long id) {
+		String selectSQL_Themengebiet = "SELECT ID, NAME, BESCHREIBUNG, IMAGE_HEADER FROM PUBLIC.BERATUNGSTHEMEN_GEBIETE WHERE ID = " + id + ";";
+		String selectSQL_Services = "SELECT ID, NAME, TAGS, AMTSART_ID, BERATUNGSTHEMA_GEBIET_ID FROM PUBLIC.BERATUNGSTHEMEN_SERVICES WHERE BERATUNGSTHEMA_GEBIET_ID = " + id + ";";
+		
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Themengebiet);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				result.put("ID", dbResults.getLong(1));
+				result.put("NAME", dbResults.getString(2));
+				result.put("BESCHREIBUNG", dbResults.getString(3));
+				result.put("IMAGE", dbResults.getString(4));
+			}
+			
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+		
+
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			JSONArray serviceList = new JSONArray();
+			while (dbResults.next()) {
+				JSONObject service = new JSONObject();
+				
+				service.put("ID", dbResults.getLong(1));
+				service.put("NAME", dbResults.getString(2));
+				service.put("TAGS", dbResults.getString(3));
+				service.put("AMTSART_ID", dbResults.getLong(4));
+				
+				serviceList.add(service);
+			}
+			result.put("SERVICES", serviceList);
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+		
+		JSONArray res = new JSONArray();
+		res.add(result);
+		
+		return res;
+	}
+
+	public Object extractFieldFromPayload(long id, String fieldName) {
+		String selectSQL = "SELECT REQUEST_ID, REQUEST_PAYLOAD FROM PUBLIC.LOGGING " +
+			      		   "WHERE REQUEST_ID = " + id + ";";
+
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet results = selectPreparedStatement.executeQuery();
+			if (results.next()) {
+				
+				String payloadTxt = IOUtils.toString(results.getCharacterStream(2));
+				if(payloadTxt != null && payloadTxt.length() > 0){
+					JSONObject payload = (JSONObject) new JSONParser().parse(payloadTxt);
+					
+					if(payload.containsKey("variables")){
+						if(payload.get("variables") instanceof JSONObject){
+							JSONObject variables = (JSONObject) payload.get("variables");
+							if(variables.containsKey(fieldName)){
+								return variables.get(fieldName);
+							}else{
+					            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%n' konnte kein Eintrag '%s' gefunden werden!", id, fieldName));
+							}
+						}else{
+				            throw new SQLException(String.format("Illegaler Eintragstyp in den Variablen des Request-Payload des Eintrags mit ID '%n'!", id, fieldName));
+						}
+					}else{
+			            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%n' konnte kein Eintrag 'variables' gefunden werden!", id, fieldName));
+					}
+				}else{
+		            throw new SQLException(String.format("Request-Payload des Eintrags mit ID '%n' konnte nicht gelesen werden!", id));
+				}
+			}else {
+	            throw new SQLException("Datenauslesen fehlgeschlage, Daten fehlerhaft!");
+        }
+
+		} catch (SQLException e) {
+	        throw new RuntimeException(e.getMessage());
+		} catch (ParseException e) {
+            throw new RuntimeException(String.format("Request-Payload des Eintrags mit ID '%n' ist korrupt!", id));
+		} catch (IOException e) {
 	        throw new RuntimeException(e.getMessage());
 		} 
 	}
