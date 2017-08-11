@@ -410,5 +410,94 @@ public class Facade {
 		        throw new RuntimeException(e.getMessage());
 			} 
 	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONArray getInformationEinzeldaten(long id, boolean getListDocuments) {
+		
+		String selectSQL_Themengebiet = "SELECT ID, SERVICE_ID, NAME, ANTWORT, ANTWORT_VORSCHAU, VORGEHENSWEISE_UND_DETAIL, ZUSTAENDIGE_STELLEN, ZIELGRUPPE, MEHR_INFOS, FRISTEN FROM PUBLIC.INFORMATIONEN WHERE ID = " + id + ";";
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Themengebiet);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				
+				result.put("ID", dbResults.getLong(1));
+				result.put("SERVICE_ID", dbResults.getLong(2));
+				result.put("NAME", dbResults.getString(3));
+				result.put("ANTWORT", dbResults.getString(4));
+				result.put("ANTWORT_VORSCHAU", dbResults.getString(5));
+				result.put("VORGEHENSWEISE_UND_DETAIL", dbResults.getString(6));
+				result.put("ZUSTAENDIGE_STELLEN", dbResults.getString(7));
+				result.put("ZIELGRUPPE", dbResults.getString(8));
+				result.put("MEHR_INFOS", dbResults.getString(9));
+				result.put("FRISTEN", dbResults.getString(10));
+				
+				if(getListDocuments) result.put("DOKUMENTE", gibListeDokumenteZuInformation(id));
+			}
+			
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+		
+		JSONArray res = new JSONArray();
+		res.add(result);
+		
+		return res;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JSONArray gibListeDokumenteZuInformation(long id) {
+		String selectSQL_Themengebiet = "SELECT ID, NAME, PFAD, DOKUMENTENTYP FROM PUBLIC.DOKUMENTE WHERE ZUGEHOERIGE_FRAGE = " + id + ";";
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Themengebiet);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				
+				result.put("ID", dbResults.getLong(1));
+				result.put("NAME", dbResults.getString(2));
+				result.put("PFAD", dbResults.getString(3));
+				
+				result.put("DOKUMENTENTYP", gibDokumentenTypEinzeldaten(dbResults.getLong(4)));
+			}
+			
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+		
+		JSONArray res = new JSONArray();
+		res.add(result);
+		
+		return res;
+	}
+
+	@SuppressWarnings("unchecked")
+	private JSONObject gibDokumentenTypEinzeldaten(long id) {
+		String selectSQL_Themengebiet = "SELECT ID, LOGO, NAME, ENDUNG FROM PUBLIC.DOKUMENTENTYPEN WHERE ID = " + id + ";";
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Themengebiet);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				result.put("ID", dbResults.getLong(1));
+				result.put("LOGO", dbResults.getString(2));
+				result.put("NAME", dbResults.getString(3));
+				result.put("ENDUNG", dbResults.getString(4));
+			}
+			
+			return result;
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		}
+	}
 
 }

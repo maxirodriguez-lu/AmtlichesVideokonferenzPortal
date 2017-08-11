@@ -60,6 +60,13 @@ public class DataHandler implements JavaDelegate{
 																		   true);
 							status = STATUSENUM.OKAY;
 							break;
+					case INFORMATIONEINZELDATEN:
+						result = databaseHandler.getInformationEinzeldaten((long) databaseHandler.extractFieldFromPayload(id, "ID"),
+																		   true);
+						status = STATUSENUM.OKAY;
+						break;
+					default:
+						break;
 					}
 					
 					break;

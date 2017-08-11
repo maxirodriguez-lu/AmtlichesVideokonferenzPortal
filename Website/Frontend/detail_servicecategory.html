@@ -124,7 +124,7 @@
   		  .done(function( data ) {
   		  	if ( console && console.log ) {
 	  			var beratungsthema = data.RESULT[0];
-    				if(beratungsthema) $("#headerImageContainer").css("background-image", "url(" + beratungsthema.IMAGE + ")");
+    				if(beratungsthema.IMAGE) $("#headerImageContainer").css("background-image", "url(" + beratungsthema.IMAGE + ")");
    					if(beratungsthema.NAME) $("#headerHeading").text(beratungsthema.NAME);
    					if(beratungsthema.BESCHREIBUNG) $("#headerSubheading").text(beratungsthema.BESCHREIBUNG);
    					if(beratungsthema.SERVICES){

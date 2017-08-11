@@ -34,37 +34,28 @@
   </div>
   <div class="information section" id="FAQs">
     <div>
-      <h2></h2>
+      <h2 id="txtName"></h2>
       <div class="w-row">
         <div class="w-col w-col-1"></div>
         <div class="w-col w-col-10">
-          <div class="field w-richtext"></div>
+          <div id="txtAntwort" class="field w-richtext"></div>
           <h3 class="fieldheading">Zielgruppe</h3>
-          <div class="field w-richtext"></div>
+          <div id="txtZielgruppe" class="field w-richtext"></div>
           <h3 class="fieldheading">Fristen</h3>
-          <div class="w-richtext"></div>
+          <div id="txtFristen" class="field w-richtext"></div>
           <h3 class="fieldheading">Vorgehensweise und Details</h3>
-          <div class="field w-richtext"></div>
+          <div id="txtVorgehensweise" class="field w-richtext"></div>
           <h3 class="fieldheading">Zuständige Stellen</h3>
-          <div class="w-richtext"></div>
+          <div id="txtZustaendig" class="field w-richtext"></div>
           <h3 class="fieldheading">Mehr zu diesem Thema</h3>
-          <div class="field w-richtext"></div>
+          <div id="txtMehr" class="field w-richtext"></div>
           <h3 class="fieldheading">Zugehörige Dokumente</h3>
           <div class="w-dyn-list">
-            <div class="w-dyn-items">
-              <div class="w-dyn-item">
-                <div class="document w-row">
-                  <div class="w-col w-col-1"><img class="doclogo" sizes="(max-width: 479px) 73vw, (max-width: 767px) 76vw, (max-width: 991px) 5vw, 6vw"></div>
-                  <div class="doctitle w-col w-col-11">
-                    <a class="doclinkbox w-inline-block" target="_blank">
-                      <h5 class="doclink"></h5>
-                    </a>
-                  </div>
-                </div>
-              </div>
+            <div id="success-dataFound-anfrage" class="w-dyn-items">
+              <!-- Programmatically inserted -->
             </div>
-            <div class="w-dyn-empty">
-              <div class="nodocsfound">Keine Zugehörigen DOkumente vorhanden.</div>
+            <div id="fail-nodata-anfrage" class="w-dyn-empty">
+              <div class="nodocsfound">Keine zugehörigen Dokumente vorhanden.</div>
             </div>
           </div>
         </div>
@@ -87,6 +78,136 @@
   <div class="center footer"></div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" type="text/javascript"></script>
   <script src="js/webflow.js" type="text/javascript"></script>
+  <script>
+ 	var host = "localhost";
+  
+  	$().ready(function(){
+	  
+		var errOcc = false;
+		
+	  	$( "#fail-nodata-anfrage" ).hide( "fast" );
+		$( "#success-dataFound-anfrage" ).hide( "fast" );
+		
+		var urlParams = getUrlParams();
+
+		$.ajax({
+	    	headers: { 
+	    	    "Accept": "application/json",
+	        	"Content-Type": "application/json"
+	    	},
+		  	url: "http://" + host + ":8080/requestHandler/rest/request/getData/InformationEinzeldaten/?user=AVP_Frontend&userAuth=test",
+	    	type: "POST",
+	    	dataType: "json",
+	    	data: "{\"variables\": {\"ID\":" + urlParams.ID + "}}"
+		})
+		  .fail(function(data){
+  			$( "#fail-nodata-anfrage" ).show( "fast" );
+    		$( "#success-dataFound-anfrage" ).hide( "fast" );
+  		
+	  		if ( console && console.log ) {
+	  	  		console.log( data );
+	  	  	}
+		  })
+		  .done(function( data ) {
+				if ( console && console.log ) {
+		  			var informationEinzeldaten = data.RESULT[0];
+	  		    	if(informationEinzeldaten){
+	   					if(informationEinzeldaten.NAME){
+	   						$("#txtName").append(informationEinzeldaten.NAME);
+	   					}else{
+	   						$("#txtName").append("--- INHALT NICHT GEFUNDEN ---");
+	   					}
+	   					if(informationEinzeldaten.ANTWORT){
+	   						$("#txtAntwort").append(informationEinzeldaten.ANTWORT);
+	   					}
+	   					if(informationEinzeldaten.ZIELGRUPPE){
+	   						$("#txtZielgruppe").append(informationEinzeldaten.ZIELGRUPPE);
+	   					}
+	   					if(informationEinzeldaten.FRISTEN){
+	   						$("#txtFristen").append(informationEinzeldaten.FRISTEN);
+	   					}
+	   					if(informationEinzeldaten.VORGEHENSWEISE_UND_DETAIL){
+	   						$("#txtVorgehensweise").append(informationEinzeldaten.VORGEHENSWEISE_UND_DETAIL);
+	   					}
+	   					if(informationEinzeldaten.ZUSTAENDIGE_STELLEN){
+	   						$("#txtZustaendig").append(informationEinzeldaten.ZUSTAENDIGE_STELLEN);
+	   					}
+	   					if(informationEinzeldaten.MEHR_INFOS){
+	   						$("#txtMehr").append(informationEinzeldaten.MEHR_INFOS);
+	   					}
+	   					
+	   					console.log("Dokumente");
+	   					if(informationEinzeldaten.DOKUMENTE){
+	   						var dokumente = informationEinzeldaten.DOKUMENTE;
+	   						
+	   						if(dokumente){
+		   						for(dokument of dokumente){
+		   							if(dokument.NAME){
+			  	  		  				addTemplate($( '#success-dataFound-anfrage' ), 
+			  	  		  								dokument.NAME, 
+			  	  		  								dokument.DOKUMENTENTYP.LOGO, 
+			  	  		  								dokument.PFAD);
+		  		    				}else{
+		  		    					errOcc = true;
+		  		    				}	
+		   						}
+	   						}else{
+	   							errOcc = true;
+	   						}
+	   					}else{
+   							errOcc = true;
+   						}
+	  		    	}else{
+	  		    		console.log( "Keine Informationen in der Datenbank gepflegt!" );
+	  		    		errOcc = true;
+	  		    	}
+		    	}	
+		    })
+		  .always(function() {
+			    $.getScript("js/webflow.js", function(){
+			      //Do nothing yet
+			  	});
+			  
+	    		if(errOcc){
+	    	  	  		$( "#fail-nodata-anfrage" ).show( "fast" );
+	    				$( "#success-dataFound-anfrage" ).hide( "fast" );
+	    		}else{
+	    	  	  		$( "#fail-nodata-anfrage" ).hide( "fast" );
+	    				$( "#success-dataFound-anfrage" ).show( "fast" );
+	    		}
+  	  });
+  });
+
+	
+	function addTemplate(node, name, image, link){
+		jQuery.get('Templates/HTML-Snippets/Dokument.html', function(template) {
+			   
+			var filledInTemplate = template.replace("%NAME%", name);
+		 	filledInTemplate = filledInTemplate.replace("%IMAGE%", image);
+		 	filledInTemplate = filledInTemplate.replace("%LINK%", link);
+			
+		 	node.append(filledInTemplate);  
+		});
+	}
+	
+	
+	function getUrlParams(){
+		var params = {};
+
+		if (location.search) {
+		    var parts = location.search.substring(1).split('&');
+
+		    for (var i = 0; i < parts.length; i++) {
+		        var nv = parts[i].split('=');
+		        if (!nv[0]) continue;
+		        params[nv[0]] = nv[1] || true;
+		    }
+		}
+		
+		return params;
+	}
+  	
+  </script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
 </body>
 </html>
