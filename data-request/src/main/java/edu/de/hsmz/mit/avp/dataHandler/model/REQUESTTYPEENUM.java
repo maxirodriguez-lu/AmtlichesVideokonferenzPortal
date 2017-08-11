@@ -2,7 +2,8 @@ package edu.de.hsmz.mit.avp.dataHandler.model;
 
 public enum REQUESTTYPEENUM {
 	SERVICEKATEGORIEN ("Servicekategorien"),
-	SERVICEEINZELDATEN ("ServiceEinzeldaten"),
+	SERVICEKATEGORIEEINZELDATEN ("ServicekategorieEinzeldaten"),
+	SERVICEEINZELDATEN("ServiceEinzeldaten"),
 	BERATER ("Berater");
 	
 	private String text;

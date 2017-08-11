@@ -209,13 +209,13 @@
 			
 		 	node.append(filledInTemplate);  
 		});
-		
-		$.expr[":"].contains = $.expr.createPseudo(function(arg) {
-		    return function( elem ) {
-		        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
-		    };
-		});
 	}
+	
+	$.expr[":"].contains = $.expr.createPseudo(function(arg) {
+	    return function( elem ) {
+	        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+	    };
+	});
 	
 	$('#search-keyword').bind("enterKey",function(e){
 		$( '#search-Start' ).click();

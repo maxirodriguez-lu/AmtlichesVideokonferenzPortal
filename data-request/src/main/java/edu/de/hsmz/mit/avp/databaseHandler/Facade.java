@@ -215,9 +215,8 @@ public class Facade {
 	
 
 	@SuppressWarnings("unchecked")
-	public JSONArray getServiceEinzeldaten(long id) {
+	public JSONArray getServicekategorieEinzeldaten(long id, boolean getZugehoerigeServices) {
 		String selectSQL_Themengebiet = "SELECT ID, NAME, BESCHREIBUNG, IMAGE_HEADER FROM PUBLIC.BERATUNGSTHEMEN_GEBIETE WHERE ID = " + id + ";";
-		String selectSQL_Services = "SELECT ID, NAME, TAGS, AMTSART_ID, BERATUNGSTHEMA_GEBIET_ID FROM PUBLIC.BERATUNGSTHEMEN_SERVICES WHERE BERATUNGSTHEMA_GEBIET_ID = " + id + ";";
 		
 		JSONObject result = new JSONObject();
 		
@@ -237,32 +236,38 @@ public class Facade {
 	        throw new RuntimeException(e.getMessage());
 		} 
 		
-
-		try(
-			Connection conn = getFachlicheDatenbank();	
-			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
-		){
-			ResultSet dbResults = selectPreparedStatement.executeQuery();
-			JSONArray serviceList = new JSONArray();
-			while (dbResults.next()) {
-				JSONObject service = new JSONObject();
-				
-				service.put("ID", dbResults.getLong(1));
-				service.put("NAME", dbResults.getString(2));
-				service.put("TAGS", dbResults.getString(3));
-				service.put("AMTSART_ID", dbResults.getLong(4));
-				
-				serviceList.add(service);
-			}
-			result.put("SERVICES", serviceList);
-		} catch (Exception e) {
-	        throw new RuntimeException(e.getMessage());
-		} 
+		if(getZugehoerigeServices) result.put("SERVICES", getListeServicesZuThemengebiet(id));
 		
 		JSONArray res = new JSONArray();
 		res.add(result);
 		
 		return res;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONArray getListeServicesZuThemengebiet(long id){
+		String selectSQL_Services = "SELECT ID, NAME, TAGS, AMTSART_ID, BERATUNGSTHEMA_GEBIET_ID FROM PUBLIC.BERATUNGSTHEMEN_SERVICES WHERE BERATUNGSTHEMA_GEBIET_ID = " + id + ";";
+		
+		try(
+				Connection conn = getFachlicheDatenbank();	
+				PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
+			){
+				ResultSet dbResults = selectPreparedStatement.executeQuery();
+				JSONArray serviceList = new JSONArray();
+				while (dbResults.next()) {
+					JSONObject service = new JSONObject();
+					
+					service.put("ID", dbResults.getLong(1));
+					service.put("NAME", dbResults.getString(2));
+					service.put("TAGS", dbResults.getString(3));
+					service.put("AMTSART_ID", dbResults.getLong(4));
+					
+					serviceList.add(service);
+				}
+				return serviceList;
+			} catch (Exception e) {
+		        throw new RuntimeException(e.getMessage());
+			} 
 	}
 
 	public Object extractFieldFromPayload(long id, String fieldName) {
@@ -309,4 +314,101 @@ public class Facade {
 	        throw new RuntimeException(e.getMessage());
 		} 
 	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONArray getServiceEinzeldaten(long beratungsthema_id, long service_id, boolean getListeAemter, boolean getListeInformationen) {
+		JSONObject servicekategorie = (JSONObject) getServicekategorieEinzeldaten(beratungsthema_id, false).get(0);
+		
+		if(servicekategorie != null){
+			String selectSQL_Themengebiet = "SELECT ID, NAME, TAGS, AMTSART_ID FROM PUBLIC.BERATUNGSTHEMEN_SERVICES WHERE ID = " + service_id + ";";
+			JSONObject result = new JSONObject();
+			
+			try(
+				Connection conn = getFachlicheDatenbank();	
+				PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Themengebiet);
+			){
+				ResultSet dbResults = selectPreparedStatement.executeQuery();
+				if (dbResults.first()) {
+					
+					result.put("ID", dbResults.getLong(1));
+					result.put("NAME", dbResults.getString(2));
+					result.put("TAGS", dbResults.getString(3));
+					result.put("AMTSART_ID", dbResults.getLong(4));
+					
+					result.put("SERVICEKATEGORIE", servicekategorie);
+					if(getListeAemter) result.put("ZUSTAENDIGE_AEMTER", gibListeZustaendigerAemterZuService(dbResults.getLong(4)));
+					if(getListeInformationen) result.put("INFORMATIONEN", gibListeInformationenZuService(service_id));
+				}
+				
+			} catch (Exception e) {
+		        throw new RuntimeException(e.getMessage());
+			} 
+			
+			JSONArray res = new JSONArray();
+			res.add(result);
+			
+			return res;
+		}else{
+	        throw new RuntimeException(String.format("Servicekategorie mit der ID '%n' konnte nicht gefunden werden!", beratungsthema_id));
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONArray gibListeZustaendigerAemterZuService(long id){
+		String selectSQL_Services = "SELECT ID, NAME, LOGO, ADRESSE, PLZ, ORT, MAIL, TELEFON, URL, PLZ_GEBIET_VON, PLZ_GEBIET_BIS FROM PUBLIC.AEMTER WHERE ID = " + id + ";";
+		
+		try(
+				Connection conn = getFachlicheDatenbank();	
+				PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
+			){
+				ResultSet dbResults = selectPreparedStatement.executeQuery();
+				JSONArray amtsListe = new JSONArray();
+				while (dbResults.next()) {
+					JSONObject amt = new JSONObject();
+					
+					amt.put("ID", dbResults.getLong(1));
+					amt.put("NAME", dbResults.getString(2));
+					amt.put("LOGO", dbResults.getString(3));
+					amt.put("ADRESSE", dbResults.getString(4));
+					amt.put("PLZ", dbResults.getLong(5));
+					amt.put("ORT", dbResults.getString(6));
+					amt.put("MAIL", dbResults.getString(7));
+					amt.put("TELEFON", dbResults.getString(8));
+					amt.put("URL", dbResults.getString(9));
+					amt.put("PLZ_GEBIET_VON", dbResults.getLong(10));
+					amt.put("PLZ_GEBIET_BIS", dbResults.getLong(11));
+					
+					amtsListe.add(amt);
+				}
+				return amtsListe;
+			} catch (Exception e) {
+		        throw new RuntimeException(e.getMessage());
+			} 
+	}
+
+	@SuppressWarnings("unchecked")
+	public JSONArray gibListeInformationenZuService(long id){
+		String selectSQL_Services = "SELECT ID, NAME, ANTWORT_VORSCHAU FROM PUBLIC.INFORMATIONEN WHERE SERVICE_ID = " + id + ";";
+		
+		try(
+				Connection conn = getFachlicheDatenbank();	
+				PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
+			){
+				ResultSet dbResults = selectPreparedStatement.executeQuery();
+				JSONArray informationenListe = new JSONArray();
+				while (dbResults.next()) {
+					JSONObject information = new JSONObject();
+					
+					information.put("ID", dbResults.getLong(1));
+					information.put("NAME", dbResults.getString(2));
+					information.put("ANTWORT_VORSCHAU", dbResults.getString(3));
+					
+					informationenListe.add(information);
+				}
+				return informationenListe;
+			} catch (Exception e) {
+		        throw new RuntimeException(e.getMessage());
+			} 
+	}
+
 }

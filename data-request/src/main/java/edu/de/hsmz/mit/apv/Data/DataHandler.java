@@ -48,12 +48,18 @@ public class DataHandler implements JavaDelegate{
 							result = databaseHandler.getServicekategorien();
 							status = STATUSENUM.OKAY;
 							break;
-					case SERVICEEINZELDATEN:
-						result = databaseHandler.getServiceEinzeldaten((long) databaseHandler.extractFieldFromPayload(id, "BERATUNGSGEBIET_ID"));
-						status = STATUSENUM.OKAY;
-						break;
-					default:
-						break;
+						case SERVICEKATEGORIEEINZELDATEN:
+							result = databaseHandler.getServicekategorieEinzeldaten((long) databaseHandler.extractFieldFromPayload(id, "BERATUNGSGEBIET_ID"), 
+																					true);
+							status = STATUSENUM.OKAY;
+							break;
+						case SERVICEEINZELDATEN:
+							result = databaseHandler.getServiceEinzeldaten((long) databaseHandler.extractFieldFromPayload(id, "BERATUNGSGEBIET_ID"),
+																		   (long) databaseHandler.extractFieldFromPayload(id, "SERVICE_ID"),
+																		   true,
+																		   true);
+							status = STATUSENUM.OKAY;
+							break;
 					}
 					
 					break;

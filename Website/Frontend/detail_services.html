@@ -152,6 +152,17 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8mYd88d3MKVqqveMpV93fkclfe32uHtY">
   </script>
   <script>
+  
+  $().ready(function(){
+	  
+	  //Daten laden:
+	  // - Header (aus Beratungsgebiet)
+	  // - Gängige Probleme (aus Informationen: Überschrift und kurztext)
+  	  // - Liste aller zuständigen Ämter
+	  
+  });
+  
+  
   var map;
   var marker;
   
@@ -184,6 +195,8 @@
           position: coords
         });
         marker.addListener('click', toggleBounce);
+        
+        map.panTo(marker.getPosition());
     }
 
     function toggleBounce() {
