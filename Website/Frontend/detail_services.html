@@ -81,7 +81,11 @@
     </div>
   </div>
   <div class="karte section">
-    <div class="mapbox w-widget w-widget-map" data-widget-latlng="49.992862,8.247253" data-widget-style="roadmap" data-widget-zoom="12"></div>
+  
+  	<!-- Google Maps Placeholder - programmatically initiated -->
+    <div id="mapPlaceHolder" class="mapbox"></div>
+    <!-- Google Maps Placeholder - programmatically initiated ENDE -->
+    
   </div>
   <div class="help1 section" id="Help">
     <div class="w-container">
@@ -112,7 +116,9 @@
       <div class="w-dyn-empty">
         <div>No items found.</div>
       </div>
-    </div><a class="button informationenhide" data-ix="hideinfors" href="#Amtswahl">IndividuelleN Beratungstermin vereinbaren</a></div>
+    </div>
+    	<a id="button-termin-vereinbaren" class="button informationenhide" data-ix="hideinfors" href="#Amtswahl">IndividuelleN Beratungstermin vereinbaren</a>
+   	</div>
   <div class="help2 section" id="Help_FAQs">
     <div class="w-container">
       <div class="section-title-group">
@@ -137,8 +143,57 @@
     </div>
   </div>
   <div class="center footer"></div>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" type="text/javascript"></script>
+  <script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"
+		type="text/javascript">
+  </script>
   <script src="js/webflow.js" type="text/javascript"></script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8mYd88d3MKVqqveMpV93fkclfe32uHtY">
+  </script>
+  <script>
+  var map;
+  var marker;
+  
+  $('#button-termin-vereinbaren').click(function(event){
+	  initMap();
+  });
+  
+  function initMap() {
+  	if(!map){
+        map = new google.maps.Map(document.getElementById('mapPlaceHolder'), {
+            zoom: 13,
+            center: {lat: 59.325, lng: 18.070}
+          });
+	  }
+  	
+  		
+  		setMarker({lat: 59.327, lng: 18.067});
+  		setMarker({lat: 59.227, lng: 19.067});
+  		setMarker({lat: 59.227, lng: 17.067});
+    }
+  
+    function setMarker(coords){
+		if(marker){
+			marker.setMap(null);
+		}
+        marker = new google.maps.Marker({
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: coords
+        });
+        marker.addListener('click', toggleBounce);
+    }
+
+    function toggleBounce() {
+      if (marker.getAnimation() !== null) {
+        marker.setAnimation(null);
+      } else {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+      }
+    }
+  </script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
 </body>
 </html>
