@@ -124,18 +124,25 @@
   		  .done(function( data ) {
   		  	if ( console && console.log ) {
 	  			var beratungsthema = data.RESULT[0];
+	  			
     				if(beratungsthema.IMAGE) $("#headerImageContainer").css("background-image", "url(" + beratungsthema.IMAGE + ")");
    					if(beratungsthema.NAME) $("#headerHeading").text(beratungsthema.NAME);
    					if(beratungsthema.BESCHREIBUNG) $("#headerSubheading").text(beratungsthema.BESCHREIBUNG);
    					if(beratungsthema.SERVICES){
    						var services = beratungsthema.SERVICES;
-   						for(service of services){
-   							if(service.NAME){
-	  	  		  				addTemplate($( '#success-dataFound-anfrage' ), 
-	  	  		  							service.NAME, 
-	  	  		  							beratungsthema.ID, 
-	  	  		  							service.ID);
-  		    				}	
+   						if(services && services.length > 0){
+	   						for(service of services){
+	   							if(service.NAME){
+		  	  		  				addTemplate($( '#success-dataFound-anfrage' ), 
+		  	  		  							service.NAME, 
+		  	  		  							beratungsthema.ID, 
+		  	  		  							service.ID);
+	  		    				}else{
+	  		    					errOcc = true;
+	  		    				}
+	   						}
+   						}else{
+   							errOcc = true;
    						}
    					}
     			}else{

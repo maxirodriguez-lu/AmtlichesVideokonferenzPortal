@@ -63,23 +63,17 @@
 	          </div>
 	        </div>
 	        <h5 class="plzsearch_description">Trefferliste:</h5>
+	        
+	        <!--Trefferliste Ämter - programmatisch befüllen  -->
 	        <div class="w-dyn-list">
-	          <div class="w-dyn-items w-row">
-	            <div class="w-col w-col-4 w-dyn-item">
-	              <div class="white-box whiteboxamtswahl" data-ix="hover-effect">
-	                <a class="linkboxamtswahl w-inline-block">
-	                  <h3></h3><img class="grid-image gridimageamtswahl" sizes="100vw">
-	                  <div class="adress paragraphamtswahl"></div>
-	                  <div class="adress paragraphamtswahl"></div>
-	                  <div class="paragraphamtswahl url"></div>
-	                </a>
-	              </div>
-	            </div>
+	          <div id="success-dataFound_Aemter" class="w-dyn-items w-row">
+				<!-- Programmatische Befüllung hier -->
 	          </div>
-	          <div class="w-dyn-empty">
+	          <div id="fail-nodata-anfrag" class="w-dyn-empty">
 	            <div>Keine passenden Ämter gefunden.</div>
 	          </div>
 	        </div>
+	        <!--Trefferliste Ämter - programmatisch befüllen ENDE -->
 	      </div>
 	    </div>
 	  </div>
@@ -114,8 +108,8 @@
 	      <h2>Gängige Probleme</h2>
 	      <p>Bitte prüfen Sie, ob die hinterlegten Informationen ihre Frage beantworten. Sollte dies nicht der Fall sein können Sie über die Schaltfläche "INDIVIDUELLE BERATUNGSTERMIN VEREINBAREN" einen individuellen Beratungstermin vereinbaren.</p>
 	    </div>
-	    <div id="success-dataFound-anfrage" class="w-dyn-list">
-	      <div class="w-dyn-items">
+	    <div class="w-dyn-list">
+	      <div id="success-dataFound-anfrage" class="w-dyn-items">
 	        <div class="w-dyn-item">
 	          <div id="InformationenWrapper" class="infowrapper">
 	          	<!-- Programmatische Befüllung -->
@@ -123,7 +117,7 @@
 	        </div>
 	      </div>
 	      <div id="fail-nodata-anfrage" class="w-dyn-empty">
-	        <div>Keine Fragen vorhanden.</div>
+	        <div>Keine FAQs zum Thema vorhanden.</div>
 	      </div>
 	    <!--  INFROMATIONEN ENDE -->
 	   
@@ -170,9 +164,12 @@
   	$().ready(function(){
 	  
 		var errOcc = false;
+		var errOcc_Aemter = false;
 		
 	  	$( "#fail-nodata-anfrage" ).hide( "fast" );
 		$( "#success-dataFound-anfrage" ).hide( "fast" );
+	  	$( "#fail-nodata_Aemter-anfrage" ).hide( "fast" );
+		$( "#success-dataFound_Aemter-anfrage" ).hide( "fast" );
 		
 		var urlParams = getUrlParams();
 
@@ -207,20 +204,46 @@
 	   					}
 	   					if(serviceEinzeldaten.INFORMATIONEN){
 	   						var informationen = serviceEinzeldaten.INFORMATIONEN;
-	   						if(informationen){
+	   						if(informationen && informationen.length > 0){
 		   						for(info of informationen){
 		   							if(info.NAME){
 			  	  		  				addTemplate($( '#InformationenWrapper' ), 
 			  	  		  							info.NAME, 
 			  	  		  							info.ANTWORT_VORSCHAU, 
 			  	  		  							info.ID);
-		  		    				}	
+		   							}else{
+		   								errOcc = true;
+		   							}
 		   						}
+	   						}else{
+	   							errOcc = true;
 	   						}
+	   					}else{
+	   						errOcc = true;
+	   					}
+	   					if(serviceEinzeldaten.ZUSTAENDIGE_AEMTER){
+	   						var aemter = serviceEinzeldaten.ZUSTAENDIGE_AEMTER;
+	   						if(aemter && aemter.length > 0){
+		   						for(amt of aemter){
+		   							if(amt.NAME){
+		   								console.log(amt.NAME);
+// 			  	  		  				addTemplate($( '#InformationenWrapper' ), 
+// 			  	  		  								amt.NAME, 
+// 			  	  		  								amt.ANTWORT_VORSCHAU, 
+// 			  	  		  								amt.ID);
+		   							}else{
+		   								errOcc_Aemter = true;
+		   							}
+		   						}
+	   						}else{
+	   							errOcc_Aemter = true;
+	   						}
+	   					}else{
+	   						errOcc_Aemter = true;
 	   					}
 	  		    	}else{
 	  		    		console.log( "Keine Informationen in der Datenbank gepflegt!" );
-	  		    		errOcc = true;
+	  		    		errOcc_Aemter = true;
 	  		    	}
 		    	}	
 		    })
@@ -229,13 +252,20 @@
 			      //Do nothing yet
 			  	});
 			  
-	    		if(errOcc){
+	    		if(errOcc || errOcc_Aemter){
 	    	  	  		$( "#fail-nodata-anfrage" ).show( "fast" );
 	    				$( "#success-dataFound-anfrage" ).hide( "fast" );
 	    		}else{
 	    	  	  		$( "#fail-nodata-anfrage" ).hide( "fast" );
 	    				$( "#success-dataFound-anfrage" ).show( "fast" );
 	    		}
+	    		if(errOcc_Aemter){
+    	  	  		$( "#fail-nodata_Aemter-anfrage" ).show( "fast" );
+    				$( "#success-dataFound_Aemter-anfrage" ).hide( "fast" );
+	    		}else{
+    	  	  		$( "#fail-nodata_Aemter-anfrage" ).hide( "fast" );
+    				$( "#success-dataFound_Aemter-anfrage" ).show( "fast" );
+    		}
   	  });
   });
 

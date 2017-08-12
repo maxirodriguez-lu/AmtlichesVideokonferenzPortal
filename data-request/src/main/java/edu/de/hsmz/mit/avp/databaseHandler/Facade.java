@@ -354,8 +354,8 @@ public class Facade {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public JSONArray gibListeZustaendigerAemterZuService(long id){
-		String selectSQL_Services = "SELECT ID, NAME, LOGO, ADRESSE, PLZ, ORT, MAIL, TELEFON, URL, PLZ_GEBIET_VON, PLZ_GEBIET_BIS FROM PUBLIC.AEMTER WHERE ID = " + id + ";";
+	public JSONArray gibListeZustaendigerAemterZuService(long amtsart_id){
+		String selectSQL_Services = "SELECT ID, NAME, AMTSART_ID, ADRESSE, PLZ, ORT, MAIL, TELEFON, URL, PLZ_GEBIET_VON, PLZ_GEBIET_BIS FROM PUBLIC.AEMTER WHERE AMTSART_ID = " + amtsart_id + ";";
 		
 		try(
 				Connection conn = getFachlicheDatenbank();	
@@ -368,7 +368,7 @@ public class Facade {
 					
 					amt.put("ID", dbResults.getLong(1));
 					amt.put("NAME", dbResults.getString(2));
-					amt.put("LOGO", dbResults.getString(3));
+					amt.put("AMTSART_ID", dbResults.getLong(3));
 					amt.put("ADRESSE", dbResults.getString(4));
 					amt.put("PLZ", dbResults.getLong(5));
 					amt.put("ORT", dbResults.getString(6));
