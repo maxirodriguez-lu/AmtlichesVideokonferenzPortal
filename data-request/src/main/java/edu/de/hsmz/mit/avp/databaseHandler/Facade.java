@@ -8,6 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -378,9 +381,33 @@ public class Facade {
 					amt.put("PLZ_GEBIET_VON", dbResults.getLong(10));
 					amt.put("PLZ_GEBIET_BIS", dbResults.getLong(11));
 					
+					amt.put("LOGO", gibAmtsartZuAmt(amtsart_id).get("LOGO"));
+					
 					amtsListe.add(amt);
 				}
 				return amtsListe;
+			} catch (Exception e) {
+		        throw new RuntimeException(e.getMessage());
+			} 
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONObject gibAmtsartZuAmt(long amtsart_id){
+		String selectSQL_Services = "SELECT ID, LOGO FROM PUBLIC.AMTSARTEN WHERE ID = " + amtsart_id + ";";
+		
+		try(
+				Connection conn = getFachlicheDatenbank();	
+				PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
+			){
+				ResultSet dbResults = selectPreparedStatement.executeQuery();
+				JSONObject amtsart = new JSONObject();
+				if (dbResults.first()) {
+					
+					amtsart.put("ID", dbResults.getLong(1));
+					amtsart.put("LOGO", dbResults.getString(2));
+					
+				}
+				return amtsart;
 			} catch (Exception e) {
 		        throw new RuntimeException(e.getMessage());
 			} 
@@ -498,6 +525,168 @@ public class Facade {
 		} catch (Exception e) {
 	        throw new RuntimeException(e.getMessage());
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JSONObject gibAmtOeffnungzeiten(long id, long tag){	
+		String selectSQL = "SELECT ID, " +
+								"OEFFNUNGSZEITEN_MONTAG_MORGEN_VON, " +
+								"OEFFNUNGSZEITEN_MONTAG_MORGEN_BIS, " +
+								"OEFFNUNGSZEITEN_MONTAG_MITTAG_VON, " +
+								"OEFFNUNGSZEITEN_MONTAG_MITTAG_BIS, " +
+								"OEFFNUNGSZEITEN_DIENSTAG_MORGEN_VON, " +
+								"OEFFNUNGSZEITEN_DIENSTAG_MORGEN_BIS, " +
+								"OEFFNUNGSZEITEN_DIENSTAG_MITTAG_VON, " +
+								"OEFFNUNGSZEITENDIENSTAG_MITTAG_BIS, " +
+								"OEFFNUNGSZEITEN_MITTWOCH_MORGEN_VON, " +
+								"OEFFNUNGSZEITEN_MITTWOCH_MORGEN_BIS, " +
+								"OEFFNUNGSZEITEN_MITTWOCH_MITTAG_VON, " +
+								"OEFFNUNGSZEITEN_MITTWOCH_MITTAG_BIS, " +
+								"OEFFNUNGSZEITEN_DONNERSTAG_MORGEN_VON, " +
+								"OEFFNUNGSZEITEN_DONNERSTAG_MORGEN_BIS, " +
+								"OEFFNUNGSZEITEN_DONNERSTAG_MITTAG_VON, " +
+								"OEFFNUNGSZEITEN_DONNERSTAG_MITTAG_BIS, " +
+								"OEFFNUNGSZEITEN_FREITAG_MORGEN_VON, " +
+								"OEFFNUNGSZEITEN_FREITAG_MORGEN_BIS, " +
+								"OEFFNUNGSZEITEN_FREITAG_MITTAG_VON, " +
+								"OEFFNUNGSZEITEN_FREITAG_MITTAG_BIS " + 
+							"FROM PUBLIC.AEMTER WHERE ID = " + id + ";";
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				result.put("MORGEN_VON", dbResults.getTime((int) (2 + (tag-1)*4)));
+				result.put("MORGEN_BIS", dbResults.getTime((int) (3 + (tag-1)*4)));
+				result.put("MITTAG_VON", dbResults.getTime((int) (4 + (tag-1)*4)));
+				result.put("MITTAG_BIS", dbResults.getTime((int) (5 + (tag-1)*4)));
+			}
+			
+			return result;
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		}
+		
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	private JSONObject gibMitarbeiterArbeitszeiten(long id, long tag){	
+		String selectSQL = "SELECT ID, " +
+								"ANWESENHEIT_MONTAG_MORGEN_VON, " +
+								"ANWESENHEIT_MONTAG_MORGEN_BIS, " +
+								"ANWESENHEIT_MONTAG_MITTAG_VON, " +
+								"ANWESENHEIT_MONTAG_MITTAG_BIS, " +
+								"ANWESENHEIT_DIENSTAG_MORGEN_VON, " +
+								"ANWESENHEIT_DIENSTAG_MORGEN_BIS, " +
+								"ANWESENHEIT_DIENSTAG_MITTAG_VON, " +
+								"ANWESENHEITDIENSTAG_MITTAG_BIS, " +
+								"ANWESENHEIT_MITTWOCH_MORGEN_VON, " +
+								"ANWESENHEIT_MITTWOCH_MORGEN_BIS, " +
+								"ANWESENHEIT_MITTWOCH_MITTAG_VON, " +
+								"ANWESENHEIT_MITTWOCH_MITTAG_BIS, " +
+								"ANWESENHEIT_DONNERSTAG_MORGEN_VON, " +
+								"ANWESENHEIT_DONNERSTAG_MORGEN_BIS, " +
+								"ANWESENHEIT_DONNERSTAG_MITTAG_VON, " +
+								"ANWESENHEIT_DONNERSTAG_MITTAG_BIS, " +
+								"ANWESENHEIT_FREITAG_MORGEN_VON, " +
+								"ANWESENHEIT_FREITAG_MORGEN_BIS, " +
+								"ANWESENHEIT_FREITAG_MITTAG_VON, " +
+								"ANWESENHEIT_FREITAG_MITTAG_BIS " + 
+							"FROM PUBLIC.MITARBEITER WHERE ID = " + id + ";";
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				result.put("MORGEN_VON", dbResults.getTime((int) (2 + (tag-1)*4)));
+				result.put("MORGEN_BIS", dbResults.getTime((int) (3 + (tag-1)*4)));
+				result.put("MITTAG_VON", dbResults.getTime((int) (4 + (tag-1)*4)));
+				result.put("MITTAG_BIS", dbResults.getTime((int) (5 + (tag-1)*4)));
+			}
+			
+			return result;
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		}
+		
+	}
+	
+
+	public JSONArray getMoeglicheTermine(long beartungsgebiet_id, 
+										 long service_id,
+										 long amts_id, 
+										 long tag,
+										 boolean returnEmployee) {
+
+		
+		//Hashmap aufbauen
+		HashMap<String, JSONObject> moeglicheTermine_global = new HashMap<String, JSONObject>();
+		
+		//Amt holen und Öffnungszeiten auslesen
+		JSONObject oeffnungszeiten = gibAmtOeffnungzeiten(amts_id, tag);
+		
+		//Alle MA des Amtes auslesen die den betroffenen Service betreuen, 
+
+		String selectSQL = "SELECT * FROM PUBLIC.BERATER WHERE ((BERATUNGSTHEMEN LIKE '%" + service_id + "|%') AND (AMTS_ID = " + amts_id + "));";
+		JSONObject result = new JSONObject();
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			while (dbResults.next()) {
+				
+				//PRO MA: Arbeitszeiten auslesen
+				JSONObject arbeitszeit = gibAmtOeffnungzeiten(dbResults.getLong(1), tag);
+				HashMap<String, JSONObject> moeglicheTermine_mitarbeier = new HashMap<String, JSONObject>();
+				
+				//PRO MA: Hasmap erzeugen, alle anwesenden Slots in Hashmap einfügen
+				Calendar morgen_von =  Calendar.getInstance();
+				morgen_von.setTime((Date) arbeitszeit.get("MORGEN_VON"));
+
+				Calendar morgen_bis =  Calendar.getInstance();
+				morgen_von.setTime((Date) arbeitszeit.get("MORGEN_BIS"));
+				
+				while(morgen_von.before(morgen_bis)){
+					moeglicheTermine_mitarbeier.put(morgen_von.getTime().toString(), null);
+					morgen_von.add(Calendar.MINUTE, 15);
+				}
+				
+
+				Calendar mittag_von =  Calendar.getInstance();
+				morgen_von.setTime((Date) arbeitszeit.get("MITTAG_VON"));
+				
+
+				Calendar mittag_bis =  Calendar.getInstance();
+				morgen_von.setTime((Date) arbeitszeit.get("MITTAG_BIS"));
+				
+				while(mittag_von.before(mittag_bis)){
+					moeglicheTermine_mitarbeier.put(mittag_von.getTime().toString(), null);
+					mittag_von.add(Calendar.MINUTE, 15);
+				}
+				
+			
+				//PRO MA: Einträge aus Hashmao entfernen, wo bereits Termine liegen
+			
+				//PRO MA: Termine in globale Hashmap überführen, falls noch nicht vorhanden
+			}
+			
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		}
+		
+
+		//Rückgabetyp aufbauen und zurückgeben
+		
+		return null;
 	}
 
 }

@@ -46,20 +46,17 @@
 	    <div class="w-container">
 	      <div>
 	        <div class="w-form">
-	          <form class="searchbar" data-name="Email Form" id="wf-form-Email-Form" name="wf-form-Email-Form">
-	            <h5 class="plzsearch_description">Geben Sie Ihre PLZ an, um das zuständige Amt zu ermitteln ...</h5>
-	            <div class="w-row">
-	              <div class="w-col w-col-1 w-col-medium-1">
-	                <div class="w-clearfix"><img class="searchsubmit" height="38" src="images/698627-icon-111-search-128.png" width="48"></div>
-	              </div>
-	              <div class="w-col w-col-11 w-col-medium-11"><input class="searchinput w-input" data-name="Servicesuche 2" id="Servicesuche-2" maxlength="256" name="Servicesuche-2" placeholder="PLZ angeben" required="required" type="text"></div>
+	          <div class="searchbar">
+	            	<h5 class="plzsearch_description">Geben Sie Ihre PLZ an, um das zuständige Amt zu ermitteln ...</h5>
+		            <div class="w-row">
+		              <div class="w-col w-col-2 w-col-medium-2">
+		                <div class="w-clearfix">
+			                <img id="search-End" class="searchsubmit" height="38" src="images/if_icon-113-search-minus_314480.png" width="48">
+		                	<img id="search-Start" class="searchsubmit" height="38" src="images/698627-icon-111-search-128.png" width="48">
+		               </div>
+	              	</div>
+	              <div class="w-col w-col-10 w-col-medium-10"><input class="searchinput w-input" data-name="Servicesuche" id="search-keyword" maxlength="256" name="Servicesuche" placeholder="Suchbegriff eingeben ..."></div>
 	            </div>
-	          </form>
-	          <div class="w-form-done">
-	            <div></div>
-	          </div>
-	          <div class="w-form-fail">
-	            <div></div>
 	          </div>
 	        </div>
 	        <h5 class="plzsearch_description">Trefferliste:</h5>
@@ -69,7 +66,7 @@
 	          <div id="success-dataFound_Aemter" class="w-dyn-items w-row">
 				<!-- Programmatische Befüllung hier -->
 	          </div>
-	          <div id="fail-nodata-anfrag" class="w-dyn-empty">
+	          <div id="fail-nodata_Aemter-anfrage" class="w-dyn-empty">
 	            <div>Keine passenden Ämter gefunden.</div>
 	          </div>
 	        </div>
@@ -157,7 +154,7 @@
 		src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"
 		type="text/javascript">
   </script>
-  <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8mYd88d3MKVqqveMpV93fkclfe32uHtY"></script> -->
+<!--   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8mYd88d3MKVqqveMpV93fkclfe32uHtY"></script> -->
   <script>
 	var host = "localhost";
   
@@ -168,6 +165,7 @@
 		
 	  	$( "#fail-nodata-anfrage" ).hide( "fast" );
 		$( "#success-dataFound-anfrage" ).hide( "fast" );
+		
 	  	$( "#fail-nodata_Aemter-anfrage" ).hide( "fast" );
 		$( "#success-dataFound_Aemter-anfrage" ).hide( "fast" );
 		
@@ -184,8 +182,12 @@
 	    	data: "{\"variables\": {\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + ", \"SERVICE_ID\":" + urlParams.ID + "}}"
 		})
 		  .fail(function(data){
+			  console.log("!");
   			$( "#fail-nodata-anfrage" ).show( "fast" );
     		$( "#success-dataFound-anfrage" ).hide( "fast" );
+    		
+  			$( "#fail-nodata_Aemter-anfrage" ).show( "fast" );
+    		$( "#success-dataFound_Aemter-anfrage" ).hide( "fast" );
   		
 	  		if ( console && console.log ) {
 	  	  		console.log( data );
@@ -226,11 +228,17 @@
 	   						if(aemter && aemter.length > 0){
 		   						for(amt of aemter){
 		   							if(amt.NAME){
-		   								console.log(amt.NAME);
-// 			  	  		  				addTemplate($( '#InformationenWrapper' ), 
-// 			  	  		  								amt.NAME, 
-// 			  	  		  								amt.ANTWORT_VORSCHAU, 
-// 			  	  		  								amt.ID);
+			  	  		  				addTemplateAmt($( '#success-dataFound_Aemter' ), 
+			  	  		  								amt.NAME, 
+			  	  		  								amt.ADRESSE, 
+			  	  		  								amt.PLZ,
+			  	  		  								amt.ORT,
+			  	  		  								amt.URL,
+			  	  		  								amt.LOGO,
+			  	  		  								"detail_aemter.html?ID=" + amt.ID + "&SERVICE=" + urlParams.ID + "&BERATUNGSGEBIET=" + urlParams.BERATUNGSGEBIET,
+			  	  		  								amt.PLZ_GEBIET_VON ,
+			  	  		  								amt.PLZ_GEBIET_BIS,
+			  	  		  								amt.ID);
 		   							}else{
 		   								errOcc_Aemter = true;
 		   							}
@@ -252,13 +260,14 @@
 			      //Do nothing yet
 			  	});
 			  
-	    		if(errOcc || errOcc_Aemter){
+	    		if(errOcc){
 	    	  	  		$( "#fail-nodata-anfrage" ).show( "fast" );
 	    				$( "#success-dataFound-anfrage" ).hide( "fast" );
 	    		}else{
 	    	  	  		$( "#fail-nodata-anfrage" ).hide( "fast" );
 	    				$( "#success-dataFound-anfrage" ).show( "fast" );
 	    		}
+	    		
 	    		if(errOcc_Aemter){
     	  	  		$( "#fail-nodata_Aemter-anfrage" ).show( "fast" );
     				$( "#success-dataFound_Aemter-anfrage" ).hide( "fast" );
@@ -280,7 +289,29 @@
 		 	node.append(filledInTemplate);  
 		});
 	}
+
 	
+	function addTemplateAmt(node, name, adresse, plz, ort, url, image, link, filterVon, filterBis, id){
+		jQuery.get('Templates/HTML-Snippets/Amt.html', function(template) {
+			   
+			var filledInTemplate = template.replace("%NAME%", name);
+			filledInTemplate = filledInTemplate.replace("%NAME%", name);
+			filledInTemplate = filledInTemplate.replace("%ID%", id);
+		 	filledInTemplate = filledInTemplate.replace("%ADRESSE%", adresse);
+		 	filledInTemplate = filledInTemplate.replace("%PLZ%", plz);
+		 	filledInTemplate = filledInTemplate.replace("%ORT%", ort);
+		 	filledInTemplate = filledInTemplate.replace("%ADRESSE%", adresse);
+		 	filledInTemplate = filledInTemplate.replace("%PLZ%", plz);
+		 	filledInTemplate = filledInTemplate.replace("%ORT%", ort);
+		 	filledInTemplate = filledInTemplate.replace("%URL%", url);
+		 	filledInTemplate = filledInTemplate.replace("%IMAGE%", image);
+		 	filledInTemplate = filledInTemplate.replace("%LINK%", link);
+		 	filledInTemplate = filledInTemplate.replace("%PLZ_GEBIET_VON%", filterVon);
+		 	filledInTemplate = filledInTemplate.replace("%PLZ_GEBIET_BIS%", filterBis);
+			
+		 	node.append(filledInTemplate);  
+		});
+	}
 	
 	function getUrlParams(){
 		var params = {};
@@ -301,6 +332,7 @@
   
   var map;
   var marker;
+  var geocode;
   
   $('#button-termin-vereinbaren').click(function(event){
 	  initMap();
@@ -308,18 +340,14 @@
   
    function initMap() {
 //   	if(!map){
+//   	    geocoder = new google.maps.Geocoder();
 //         map = new google.maps.Map(document.getElementById('mapPlaceHolder'), {
-//             zoom: 13,
+//             zoom: 10,
 //             center: {lat: 59.325, lng: 18.070}
 //           });
 // 	  }
-  	
-  		
-//   		setMarker({lat: 59.327, lng: 18.067});
-//   		setMarker({lat: 59.227, lng: 19.067});
-//   		setMarker({lat: 59.227, lng: 17.067});
      }
-  
+   
     function setMarker(coords){
 // 		if(marker){
 // 			marker.setMap(null);
@@ -342,6 +370,67 @@
 //         marker.setAnimation(google.maps.Animation.BOUNCE);
 //       }
     }
+    
+    function codeAddressAndSetMarker(name, adress) {
+//         geocoder.geocode( { 'address': adress}, function(results, status) {
+//           if (status == google.maps.GeocoderStatus.OK) {
+//           	map.setCenter(results[0].geometry.location);
+//             setMarker(results[0].geometry.location)
+//           } else {
+//             console.log('Geocode was not successful for the following reason: ' + status);
+//           }
+//         });
+      }
+    
+	$( '#search-Start' ).click(function(event){
+		var searchKey = $( '#search-keyword' ).val();
+		console.log(searchKey);
+		
+		// TODO if isNumber
+		
+		var domList = $( "[id^=Amt_]" );
+		domList.show( "slow" );
+		
+		if(searchKey.length > 0){
+			var hitList = domList.not(function(){	
+				return (
+						((($(this).find('#filterPLZ_Von').text() <= searchKey) && 
+					    ($(this).find('#filterPLZ_Bis').text() >= searchKey)))
+					   )
+			});
+
+			hitList = hitList.filter(function(){	
+				return (($(this).find('#filter_Ort').filter(":contains(" + searchKey +")").length == 0))
+			});
+			
+			 
+			
+			hitList.hide( "slow" );
+		}
+	});
+	
+	$( '#search-End' ).click(function(event){
+		$( '#search-keyword' ).val("");
+		
+		var domList = $( "[id^=Amt_]" );
+		domList.show( "slow" );
+	});
+	
+	$.expr[":"].contains = $.expr.createPseudo(function(arg) {
+	    return function( elem ) {
+	        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+	    };
+	});
+	
+	$('#search-keyword').bind("enterKey",function(e){
+		$( '#search-Start' ).click();
+	});
+	$('#search-keyword').keyup(function(e){
+	    if(e.keyCode == 13)
+	    {
+	        $(this).trigger("enterKey");
+	    }
+	});
   </script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
 </body>

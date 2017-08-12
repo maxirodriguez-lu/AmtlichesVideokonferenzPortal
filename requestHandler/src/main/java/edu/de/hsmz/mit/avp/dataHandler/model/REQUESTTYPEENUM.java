@@ -5,6 +5,7 @@ public enum REQUESTTYPEENUM {
 	SERVICEKATEGORIEEINZELDATEN ("ServicekategorieEinzeldaten"),
 	SERVICEEINZELDATEN("ServiceEinzeldaten"),
 	INFORMATIONEINZELDATEN("InformationEinzeldaten"),
+	MOEGLICHETERMINE("MoeglicheTermine"),
 	BERATER ("Berater");
 	
 	private String text;

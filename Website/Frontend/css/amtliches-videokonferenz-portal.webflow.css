@@ -744,12 +744,12 @@ p {
   text-align: center;
 }
 
-.employeetext {
+.employeetextTop {
   padding-top: 50px;
   padding-left: 10px;
 }
 
-.employeetext.summary {
+.employeetextTop.summary {
   padding-top: 10px;
   padding-left: 0px;
   font-size: 14px;
@@ -757,12 +757,11 @@ p {
   text-align: center;
 }
 
-.employeetextanwesenheit {
-  padding-top: 35px;
+.employeetext {
   padding-left: 10px;
 }
 
-.employeetextanwesenheit.summary {
+.employeetext.summary {
   padding-top: 10px;
   padding-left: 0px;
   font-size: 14px;

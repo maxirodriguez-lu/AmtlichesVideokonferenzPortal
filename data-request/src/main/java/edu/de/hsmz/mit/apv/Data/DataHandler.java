@@ -65,6 +65,14 @@ public class DataHandler implements JavaDelegate{
 																		   true);
 						status = STATUSENUM.OKAY;
 						break;
+					case MOEGLICHETERMINE:
+						result = databaseHandler.getMoeglicheTermine((long) databaseHandler.extractFieldFromPayload(id, "BERATUNGSGEBIET_ID"),
+																	 (long) databaseHandler.extractFieldFromPayload(id, "SERVICE_ID"),
+																	 (long) databaseHandler.extractFieldFromPayload(id, "AMTS_ID"),
+																	 (long) databaseHandler.extractFieldFromPayload(id, "WOCHENTAG_NR"),
+																	 true);
+						status = STATUSENUM.OKAY;
+						break;
 					default:
 						break;
 					}

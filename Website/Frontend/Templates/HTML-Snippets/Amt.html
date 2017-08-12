@@ -1,12 +1,15 @@
 	            
 		<!-- ITEM: Befüllung über Service -->
-			<div class="w-col w-col-4 w-dyn-item">
-	              <div class="white-box whiteboxamtswahl" data-ix="hover-effect">
-	                <a class="linkboxamtswahl w-inline-block">
-	                  <h3>%NAME%</h3><img class="grid-image gridimageamtswahl" sizes="100vw">
+			<div id="Amt_%ID%" class="w-col w-col-4 w-dyn-item">
+	              <div class="white-box whiteboxamtswahl" data-ix="hover-effect"  onmouseover="javascript: codeAddressAndSetMarker('%NAME%', '%ADRESSE%', '%PLZ% %ORT%');">
+	                <a class="linkboxamtswahl w-inline-block" href="%LINK%">
+	                  <h3>%NAME%</h3>
+	                  <img class="grid-image gridimageamtswahl" sizes="100vw" src="%IMAGE%">
 	                  <div class="adress paragraphamtswahl">%ADRESSE%</div>
-	                  <div class="adress paragraphamtswahl">%PLZ% %ORT%</div>
+	                  <div id="filter_Ort" class="adress paragraphamtswahl">%PLZ% %ORT%</div>
 	                  <div class="paragraphamtswahl url">%URL%</div>
+	                  <p id="filterPLZ_Von" style="display:none">%PLZ_GEBIET_VON%</p>
+	                  <p id="filterPLZ_Bis" style="display:none">%PLZ_GEBIET_BIS%</p>
 	                </a>
 	              </div>
 	            </div>

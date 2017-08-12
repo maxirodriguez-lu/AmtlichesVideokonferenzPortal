@@ -72,36 +72,19 @@
 				</div>
             </div>
             
-            <div class="appointmentconnectedemployee">
+            <!-- Mitarbeiter zu Appointment 1 -->
+            <div id="appointmentconnectedemployee1" class="appointmentconnectedemployee">
               <div class="section-title-group">
                 <div class="center section-subheading subheading-terminwahl">Zugewiesene mitarbeiter:</div>
               </div>
               <div class="w-dyn-list">
-                <div class="w-dyn-items">
-                  <div class="w-dyn-item">
-                    <div class="white-box whiteboxemployee">
-                      <div class="w-row">
-                        <div class="w-col w-col-3"><img class="employeeimage" sizes="100vw"></div>
-                        <div class="employeetextframe w-col w-col-9">
-                          <div class="employeename">
-                            <h3></h3>
-                            <h3></h3>
-                            <h3></h3>
-                          </div>
-                          <div class="employeetext"></div>
-                          <div class="employeetextphone"></div>
-                          <div class="employeetextanwesenheit"></div>
-                          <div class="employeetextplz"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-dyn-empty">
-                  <div class="noemployeefound">Keine freien Mitarbeiter zum ausgewählten Termin gefunden</div>
+                <div id="selectedEmployee1" class="w-dyn-items">
+                  <!-- Programmatische Befüllung -->
                 </div>
               </div>
             </div>
+            <!-- Mitarbeiter zu Appointment 1 -->
+            
           </div>
         </div>
       </div>
@@ -128,36 +111,19 @@
 				</div>
             </div>
             
-            <div class="appointmentconnectedemployee">
+            <!-- Mitarbeiter zu Appointment 2 -->
+            <div  id="appointmentconnectedemployee2" class="appointmentconnectedemployee">
               <div class="section-title-group">
-                <div class="center section-subheading subheading-terminwahl">Zugewiesene mitarbeiter:</div>
+                <div class="center section-subheading subheading-terminwahl">Zugewiesene Mitarbeiter:</div>
               </div>
               <div class="w-dyn-list">
-                <div class="w-dyn-items">
-                  <div class="w-dyn-item">
-                    <div class="white-box whiteboxemployee">
-                      <div class="w-row">
-                        <div class="w-col w-col-3"><img class="employeeimage" sizes="100vw"></div>
-                        <div class="employeetextframe w-col w-col-9">
-                          <div class="employeename">
-                            <h3></h3>
-                            <h3></h3>
-                            <h3></h3>
-                          </div>
-                          <div class="employeetext"></div>
-                          <div class="employeetextphone"></div>
-                          <div class="employeetextanwesenheit"></div>
-                          <div class="employeetextplz"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-dyn-empty">
-                  <div class="noemployeefound">Keine freien Mitarbeiter zum ausgewählten Termin gefunden</div>
+                <div id="selectedEmployee2" class="w-dyn-items">
+                  <!-- Programmatische Befüllung -->
                 </div>
               </div>
             </div>
+            <!-- Mitarbeiter zu Appointment 2 -->
+            
           </div>
         </div>
       </div>
@@ -185,36 +151,19 @@
             </div>
             <!-- Calendar END -->
             
-            <div class="appointmentconnectedemployee">
+            <!-- Mitarbeiter zu Appointment 3 -->
+            <div  id="appointmentconnectedemployee3" class="appointmentconnectedemployee">
               <div class="section-title-group">
-                <div class="center section-subheading subheading-terminwahl">Zugewiesene mitarbeiter:</div>
+                <div class="center section-subheading subheading-terminwahl">Zugewiesene Mitarbeiter:</div>
               </div>
               <div class="w-dyn-list">
-                <div class="w-dyn-items">
-                  <div class="w-dyn-item">
-                    <div class="white-box whiteboxemployee">
-                      <div class="w-row">
-                        <div class="w-col w-col-3"><img class="employeeimage" sizes="100vw"></div>
-                        <div class="employeetextframe w-col w-col-9">
-                          <div class="employeename">
-                            <h3></h3>
-                            <h3></h3>
-                            <h3></h3>
-                          </div>
-                          <div class="employeetext"></div>
-                          <div class="employeetextphone"></div>
-                          <div class="employeetextanwesenheit"></div>
-                          <div class="employeetextplz"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-dyn-empty">
-                  <div class="noemployeefound">Keine freien Mitarbeiter zum ausgewählten Termin gefunden</div>
+                <div id="selectedEmployee3" class="w-dyn-items">
+                  <!-- Programmatische Befüllung -->
                 </div>
               </div>
             </div>
+            <!-- Mitarbeiter zu Appointment 3 -->
+            
           </div>
         </div>
       </div>
@@ -385,7 +334,8 @@
   <script src="js/webflow.js" type="text/javascript"></script>
   <script>
   
-	function addTemplate(node, datum, datenr, slotnr, timefrom, timeto){
+	function addTemplate(node, datum, datenr, slotnr, timefrom, timeto,
+							   ma_id, ma_image, ma_vorname, ma_nachname, ma_telefon, ma_mail, ma_position){
 		jQuery.get('Templates/HTML-Snippets/Terminvorschlag.html', function(template) {
 			   
 			var filledInTemplate = template.replace("%DATUM%", datum);
@@ -394,8 +344,37 @@
 		 	filledInTemplate = filledInTemplate.replace("%DATENR%", datenr);
 		 	filledInTemplate = filledInTemplate.replace("%SLOTNR%", slotnr);
 		 	filledInTemplate = filledInTemplate.replace("%SLOTNR%", slotnr);
+		 	filledInTemplate = filledInTemplate.replace("%SLOTNR%", slotnr);
 		 	filledInTemplate = filledInTemplate.replace("%TIMEFROM%", timefrom);
 		 	filledInTemplate = filledInTemplate.replace("%TIMETO%", timeto);
+		 	
+		 	filledInTemplate = filledInTemplate.replace("%MA_ID%", ma_id);
+		 	filledInTemplate = filledInTemplate.replace("%MA_IMAGE%", ma_image);
+		 	filledInTemplate = filledInTemplate.replace("%MA_VORNAME%", ma_vorname);
+		 	filledInTemplate = filledInTemplate.replace("%MA_NACHNAME%", ma_nachname);
+		 	filledInTemplate = filledInTemplate.replace("%MA_TELEFON%", ma_telefon);
+		 	filledInTemplate = filledInTemplate.replace("%MA_MAIL%", ma_mail);
+		 	filledInTemplate = filledInTemplate.replace("%MA_POSITION%", ma_position);
+			
+		 	node.append(filledInTemplate);  
+		});
+	}
+
+	  
+	function addTemplateMA(node, id, image, vorname, nachname, telefon, mail, position){
+		jQuery.get('Templates/HTML-Snippets/Mitarbeiter.html', function(template) {
+			   
+			
+			console.log(vorname);
+			console.log(nachname);
+			
+			var filledInTemplate = template.replace("%ID%", id);
+		 	filledInTemplate = filledInTemplate.replace("%IMAGE%", image);
+		 	filledInTemplate = filledInTemplate.replace("%VORNAME%", vorname);
+		 	filledInTemplate = filledInTemplate.replace("%NACHNAME%", nachname);
+		 	filledInTemplate = filledInTemplate.replace("%TELEFON%", telefon);
+		 	filledInTemplate = filledInTemplate.replace("%MAIL%", mail);
+		 	filledInTemplate = filledInTemplate.replace("%POSITION%", position);
 			
 		 	node.append(filledInTemplate);  
 		});
@@ -416,15 +395,12 @@
 		        firstDayOfWeek: 1 
 		    },
 		  	onChange: function(selectedDates, dateStr, instance) {
-	        	console.log(dateStr);
 	        	$("#availableAppointments1").find("h4").find("strong").text(dateStr);
 
 	        	$("#availableAppointments1list").empty();
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 1, "08:00", "08:15");
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 2, "08:00", "08:15");
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 3, "08:00", "08:15");
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 4, "08:00", "08:15");
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 5, "08:00", "08:15");
+	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 1, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
+	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 2, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
+	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 5, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
 	      		
 	        	$("#availableAppointments1").show('fast');
 	    	},
@@ -451,13 +427,11 @@
 		        firstDayOfWeek: 1 
 		    },
 		  	onChange: function(selectedDates, dateStr, instance) {
-	        	console.log(dateStr);
 	        	$("#availableAppointments2").find("h4").find("strong").text(dateStr);
 
 	        	$("#availableAppointments2list").empty();
-	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 1, "08:00", "08:15");
-	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 2, "08:00", "08:15");
-	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 3, "08:00", "08:15");
+	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 1, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
+	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 2, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
 	        	
 	        	$("#availableAppointments2").show('fast');
 	    	},
@@ -470,44 +444,40 @@
 		   });
 	
   	var picker3 = flatpickr('#calendarElement3', { 
-  									dateFormat: 'd.m.Y',
-  									minDate: "today",
-  									maxDate: new Date().fp_incr(21),
-  									disable: [
-  								        function(date) {
-  								            // return true to disable
-  								            return (date.getDay() === 6 || date.getDay() === 0);
+			dateFormat: 'd.m.Y',
+			minDate: "today",
+			maxDate: new Date().fp_incr(21),
+			disable: [
+		        function(date) {
+		            // return true to disable
+		            return (date.getDay() === 6 || date.getDay() === 0);
 
-  								        }
-  								    ],
-  								    locale: {
-  								        firstDayOfWeek: 1 
-  								    },
-  								  	onChange: function(selectedDates, dateStr, instance) {
-  							        	console.log(dateStr);
-  							        	$("#availableAppointments3").find("h4").find("strong").text(dateStr);
+		        }
+		    ],
+		    locale: {
+		        firstDayOfWeek: 1 
+		    },
+		  	onChange: function(selectedDates, dateStr, instance) {
+	        	$("#availableAppointments3").find("h4").find("strong").text(dateStr);
 
-  							        	$( "#availableAppointments3list" ).empty();
-  							      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 1, "08:00", "08:15");
-  							      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 2, "08:00", "08:15");
-  							      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 3, "08:00", "08:15");
-  							      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 4, "08:00", "08:15");
-  							      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 5, "09:00", "09:15");
-  							      		
-  							        	$("#availableAppointments3").show('fast');
-  							    	},
-  							    	onDayCreate: function(dObj, dStr, fp, dayElem){
-  							    		if (Math.random() < 0.15){
-  							    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
-  							    		}
- 							    	},
- 							    	inline: true
-  								   });
+	        	$( "#availableAppointments3list" ).empty();
+	        	
+	        	//TODO: CALL Service to get List of possible Appointments
+	      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 1, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
+	        	$("#availableAppointments3").show('fast');
+	    	},
+	    	onDayCreate: function(dObj, dStr, fp, dayElem){
+	    		if (Math.random() < 0.15){
+	    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+	    		}
+    	},
+    	inline: true
+	   });
   	
-  	function setTime(nodeName, dateNr){
-    	console.log(nodeName);
-    	console.log(dateNr);
-
+  	function setTime(nodeName, dateNr, slotNr){
+		console.log(slotNr);
+  		
+  		
       	$("#calendar" + dateNr + "Wrapper").hide('fast');
       	
       	var uhrzeitText = $( nodeName ).find("h5").text();
@@ -518,7 +488,21 @@
       	if(dateNr == 3) dateStr = picker3.formatDate(picker3.selectedDates[0], "d.m.Y");
       	
       	$("#appointment" + dateNr + "Selected").text(dateStr + ", " + uhrzeitText);
-      	$("#appointment" + dateNr + "Selected").show('fast');
+      	$("#appointment" + dateNr + "Selected").show('fast');   
+      	
+      	console.log( $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_VORNAME").text());
+      	console.log( $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_NACHNAME").text());
+      	
+      	addTemplateMA($( "#selectedEmployee" + dateNr ), 
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_ID").text(), 
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_IMAGE").text(), 
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_VORNAME").text(), 
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_NACHNAME").text(), 
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_TELEFON").text(), 
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_MAIL").text(),
+      				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_POSITION").text());
+      				  
+      	$("#appointmentconnectedemployee" + dateNr).show('fast');
     }
   </script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->

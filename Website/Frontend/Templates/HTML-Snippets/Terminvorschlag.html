@@ -1,10 +1,19 @@
 
 		<!-- ITEM: Befüllung über Service -->
 		
-					<div id="appointment_slot_%DATENR%_%SLOTNR%" class="Appointment_Slot" onclick="setTime('#appointment_slot_%DATENR%_%SLOTNR%', %DATENR%)">
+					<div id="appointment_slot_%DATENR%_%SLOTNR%" class="Appointment_Slot" onclick="setTime('#appointment_slot_%DATENR%_%SLOTNR%', '%DATENR%', '%SLOTNR%')">
 						<div class="Appointment_Slot_Inner">
 							<div><h5>%TIMEFROM% - %TIMETO%</h5></div>
 							<div><p>Klicken zum Auswählen</p></div>
+						</div>
+						<div style="display:none">
+							<p id="MA_ID">%MA_ID%</p>
+							<p id="MA_IMAGE">%MA_IMAGE%</p>
+							<p id="MA_POSITION">%MA_POSITION%</p>
+							<p id="MA_VORNAME">%MA_VORNAME%</p>
+							<p id="MA_NACHNAME">%MA_NACHNAME%</p>
+							<p id="MA_TELEFON">%MA_TELEFON%</p>
+							<p id="MA_MAIL">%MA_MAIL%</p>
 						</div>
 					</div>
 		
