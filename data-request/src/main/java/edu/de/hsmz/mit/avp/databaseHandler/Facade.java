@@ -7,9 +7,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import javax.naming.Context;
@@ -30,6 +34,9 @@ import edu.de.hsmz.mit.avp.dataHandler.model.RequestData;
 import edu.de.hsmz.mit.avp.dataHandler.model.STATUSENUM;
 
 public class Facade {
+	SimpleDateFormat dateFormat_dateOnly = new SimpleDateFormat("dd.MM.yyyy");
+	SimpleDateFormat dateFormat_hourOnly = new SimpleDateFormat("HH:mm:ss");
+	SimpleDateFormat dateFormat_dateTime = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	
 	public static long logRequest(Request req){
 		String insertRequestSQL = "INSERT INTO PUBLIC.LOGGING (REQUEST_UUID, REQUEST_CALLERNAME, REQUEST_TIMESTAMP, REQUEST_TYPE, REQUEST_DATAOBJEKT, REQUEST_FULLURL, REQUEST_PAYLOAD, RESPONSE_STATUS) " +
@@ -583,7 +590,7 @@ public class Facade {
 								"ANWESENHEIT_DIENSTAG_MORGEN_VON, " +
 								"ANWESENHEIT_DIENSTAG_MORGEN_BIS, " +
 								"ANWESENHEIT_DIENSTAG_MITTAG_VON, " +
-								"ANWESENHEITDIENSTAG_MITTAG_BIS, " +
+								"ANWESENHEIT_DIENSTAG_MITTAG_BIS, " +
 								"ANWESENHEIT_MITTWOCH_MORGEN_VON, " +
 								"ANWESENHEIT_MITTWOCH_MORGEN_BIS, " +
 								"ANWESENHEIT_MITTWOCH_MITTAG_VON, " +
@@ -596,7 +603,7 @@ public class Facade {
 								"ANWESENHEIT_FREITAG_MORGEN_BIS, " +
 								"ANWESENHEIT_FREITAG_MITTAG_VON, " +
 								"ANWESENHEIT_FREITAG_MITTAG_BIS " + 
-							"FROM PUBLIC.MITARBEITER WHERE ID = " + id + ";";
+							"FROM PUBLIC.BERATER WHERE ID = " + id + ";";
 		JSONObject result = new JSONObject();
 		
 		try(
@@ -619,23 +626,11 @@ public class Facade {
 	}
 	
 
-	public JSONArray getMoeglicheTermine(long beartungsgebiet_id, 
-										 long service_id,
-										 long amts_id, 
-										 long tag,
-										 boolean returnEmployee) {
-
+	@SuppressWarnings("unchecked")
+	private HashMap<String, JSONObject> getAlleTerminFuerMitarbeiterAnTag(String datum, long berater_id){	
+		String selectSQL = "SELECT ID, DATUM, UHRZEIT, BERATER_ID, AMTS_ID, SERVICE_ID FROM PUBLIC.TERMINE WHERE BERATER_ID = " + berater_id + ";";
 		
-		//Hashmap aufbauen
-		HashMap<String, JSONObject> moeglicheTermine_global = new HashMap<String, JSONObject>();
-		
-		//Amt holen und Öffnungszeiten auslesen
-		JSONObject oeffnungszeiten = gibAmtOeffnungzeiten(amts_id, tag);
-		
-		//Alle MA des Amtes auslesen die den betroffenen Service betreuen, 
-
-		String selectSQL = "SELECT * FROM PUBLIC.BERATER WHERE ((BERATUNGSTHEMEN LIKE '%" + service_id + "|%') AND (AMTS_ID = " + amts_id + "));";
-		JSONObject result = new JSONObject();
+		HashMap<String, JSONObject> result = new HashMap<String, JSONObject>();
 		
 		try(
 			Connection conn = getFachlicheDatenbank();	
@@ -643,50 +638,186 @@ public class Facade {
 		){
 			ResultSet dbResults = selectPreparedStatement.executeQuery();
 			while (dbResults.next()) {
+				JSONObject termin = new JSONObject();
 				
-				//PRO MA: Arbeitszeiten auslesen
-				JSONObject arbeitszeit = gibAmtOeffnungzeiten(dbResults.getLong(1), tag);
-				HashMap<String, JSONObject> moeglicheTermine_mitarbeier = new HashMap<String, JSONObject>();
+				termin.put("ID", dbResults.getLong(1));
+				termin.put("DATUM", dbResults.getDate(2));
+				termin.put("UHRZEIT", dbResults.getTime(3));
+				termin.put("BERATER_ID", dbResults.getLong(4));
+				termin.put("AMTS_ID", dbResults.getLong(5));
+				termin.put("SERVICE_ID", dbResults.getLong(6));
 				
-				//PRO MA: Hasmap erzeugen, alle anwesenden Slots in Hashmap einfügen
-				Calendar morgen_von =  Calendar.getInstance();
-				morgen_von.setTime((Date) arbeitszeit.get("MORGEN_VON"));
-
-				Calendar morgen_bis =  Calendar.getInstance();
-				morgen_von.setTime((Date) arbeitszeit.get("MORGEN_BIS"));
-				
-				while(morgen_von.before(morgen_bis)){
-					moeglicheTermine_mitarbeier.put(morgen_von.getTime().toString(), null);
-					morgen_von.add(Calendar.MINUTE, 15);
-				}
-				
-
-				Calendar mittag_von =  Calendar.getInstance();
-				morgen_von.setTime((Date) arbeitszeit.get("MITTAG_VON"));
-				
-
-				Calendar mittag_bis =  Calendar.getInstance();
-				morgen_von.setTime((Date) arbeitszeit.get("MITTAG_BIS"));
-				
-				while(mittag_von.before(mittag_bis)){
-					moeglicheTermine_mitarbeier.put(mittag_von.getTime().toString(), null);
-					mittag_von.add(Calendar.MINUTE, 15);
-				}
-				
-			
-				//PRO MA: Einträge aus Hashmao entfernen, wo bereits Termine liegen
-			
-				//PRO MA: Termine in globale Hashmap überführen, falls noch nicht vorhanden
+				String uhrzeitTxt = dateFormat_hourOnly.format(dbResults.getTime(3).getTime());
+				result.put(uhrzeitTxt, termin);
 			}
 			
+			return result;
 		} catch (Exception e) {
 	        throw new RuntimeException(e.getMessage());
 		}
 		
-
-		//Rückgabetyp aufbauen und zurückgeben
-		
-		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	public JSONArray getMoeglicheTermine(long beartungsgebiet_id, 
+			 							 long service_id,
+			 							 long amts_id,
+			 							 boolean returnEmployee) {
+		
+		final int nrOfDays = 22;
+		
+		JSONArray result = new JSONArray();
+		
+		// Tage aufbauen
+		Calendar currentday = Calendar.getInstance(); 
+		currentday.setTime(new Date()); 
+		currentday.setFirstDayOfWeek(Calendar.MONDAY);
+
+		Calendar lastday = Calendar.getInstance(); 
+		lastday.setTime(currentday.getTime()); 
+		lastday.add(Calendar.DATE, nrOfDays);
+		lastday.setFirstDayOfWeek(Calendar.MONDAY);
+		
+		// Freie Slots für alle Tage auslesen
+		while(currentday.before(lastday)){
+			// Wochenende überspringe - Keine Felder in der Datenbank für Öffnungszeiten und Arbeitszeiten vorhanden
+			if(currentday.get(Calendar.DAY_OF_WEEK) != 1 && currentday.get(Calendar.DAY_OF_WEEK) != 7){
+				HashMap<String, JSONObject> moeglicheTermine_tag = getMoeglicheTermineForDate(beartungsgebiet_id, service_id, amts_id, dateFormat_dateOnly.format(currentday.getTime()), returnEmployee);
+				
+				JSONObject termine = new JSONObject();
+				termine.putAll(moeglicheTermine_tag);
+				
+				JSONObject tag = new JSONObject();
+				tag.put(dateFormat_dateOnly.format(currentday.getTime()), termine);
+
+				result.add(tag);
+			}
+			currentday.add(Calendar.DATE, 1);
+		}
+
+		return result;
+	}
+
+	private HashMap<String, JSONObject> getMoeglicheTermineForDate(long beartungsgebiet_id, 
+										 long service_id,
+										 long amts_id, 
+										 String datum,
+										 boolean returnEmployee) {
+		
+		//Hashmap aufbauen
+		HashMap<String, JSONObject> moeglicheTermine_global = new HashMap<String, JSONObject>();
+		
+		try{
+			//Amt holen und Öffnungszeiten auslesen
+			JSONObject oeffnungszeiten = gibAmtOeffnungzeiten(amts_id, getDayOfTheWeekFromDate(datum));
+			
+			//Alle MA des Amtes auslesen die den betroffenen Service betreuen, 
+
+			String selectSQL = "SELECT ID, TYP, ANREDE, NAME, VORNAME, EMAIL, TELEFON, PROFILBILD FROM PUBLIC.BERATER WHERE ((BERATUNGSTHEMEN LIKE '%" + service_id + "|%') AND (AMTS_ID = " + amts_id + "));";
+			
+			try(
+				Connection conn = getFachlicheDatenbank();	
+				PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+			){
+				ResultSet dbResults = selectPreparedStatement.executeQuery();
+				while (dbResults.next()) {
+					//PRO MA: Arbeitszeiten auslesen
+					JSONObject arbeitszeit = gibMitarbeiterArbeitszeiten(dbResults.getLong(1), getDayOfTheWeekFromDate(datum));
+					HashMap<String, JSONObject> moeglicheTermine_mitarbeier = new HashMap<String, JSONObject>();
+					
+					//PRO MA: Hasmap erzeugen, alle anwesenden Slots in Hashmap einfügen
+					Calendar morgen_von = getCalendarFromZeiten(datum, arbeitszeit, "MORGEN_VON").after(getCalendarFromZeiten(datum, oeffnungszeiten, "MORGEN_VON")) ?
+										  getCalendarFromZeiten(datum, arbeitszeit, "MORGEN_VON") : 
+										  getCalendarFromZeiten(datum, oeffnungszeiten, "MORGEN_VON");
+										  
+					Calendar morgen_bis = getCalendarFromZeiten(datum, arbeitszeit, "MORGEN_BIS").after(getCalendarFromZeiten(datum, oeffnungszeiten, "MORGEN_BIS")) ?
+							  			  getCalendarFromZeiten(datum, arbeitszeit, "MORGEN_BIS") : 
+							  			  getCalendarFromZeiten(datum, oeffnungszeiten, "MORGEN_BIS");
+					
+					while(morgen_von.before(morgen_bis)){
+						if(!moeglicheTermine_mitarbeier.containsKey(dateFormat_dateTime.format(morgen_von.getTime()))){
+							moeglicheTermine_mitarbeier.put(dateFormat_hourOnly.format(morgen_von.getTime()), createAppointmentJSON(morgen_von, dbResults, dateFormat_dateTime));
+						}
+						morgen_von.add(Calendar.MINUTE, 15);
+					}
+					
+					Calendar mittag_von = getCalendarFromZeiten(datum, arbeitszeit, "MITTAG_VON").after(getCalendarFromZeiten(datum, oeffnungszeiten, "MITTAG_VON")) ?
+							  			  getCalendarFromZeiten(datum, arbeitszeit, "MITTAG_VON") : 
+							  			  getCalendarFromZeiten(datum, oeffnungszeiten, "MITTAG_VON");
+							  
+					Calendar mittag_bis = getCalendarFromZeiten(datum, arbeitszeit, "MITTAG_BIS").after(getCalendarFromZeiten(datum, oeffnungszeiten, "MITTAG_BIS")) ?
+							  			  getCalendarFromZeiten(datum, arbeitszeit, "MITTAG_BIS") : 
+							  			  getCalendarFromZeiten(datum, oeffnungszeiten, "MITTAG_BIS");
+					
+					while(mittag_von.before(mittag_bis.getTime())){
+						if(!moeglicheTermine_mitarbeier.containsKey(dateFormat_dateTime.format(mittag_von.getTime()))){
+							moeglicheTermine_mitarbeier.put(dateFormat_hourOnly.format(mittag_von), createAppointmentJSON(mittag_von, dbResults, dateFormat_dateTime));
+						}
+						mittag_von.add(Calendar.MINUTE, 15);
+					}
+					
+				
+					//PRO MA: Einträge aus Hashmao entfernen, wo bereits Termine liegen
+				
+					//PRO MA: Termine in globale Hashmap überführen, falls noch nicht vorhanden
+					moeglicheTermine_global.putAll(moeglicheTermine_mitarbeier);
+				}
+				
+			} catch (Exception e) {
+		        throw new RuntimeException(e.getMessage());
+			}
+		}catch(java.text.ParseException e){
+	        throw new RuntimeException(e.getMessage());
+		}
+		
+		return moeglicheTermine_global;
+	}
+
+	private long getDayOfTheWeekFromDate(String datum) throws java.text.ParseException {
+
+		Calendar day = new GregorianCalendar();
+		day.setTime(dateFormat_dateOnly.parse(datum));
+		day.setFirstDayOfWeek(Calendar.MONDAY);
+		
+		// Montag muss als 1 zurückgegeben werden, je nach Kalendarsystem weicht dies ab (Gregorian, z.b.: 2)
+		long offset1ToMondayConstant = Calendar.MONDAY - 1;
+		
+		return (day.get(Calendar.DAY_OF_WEEK) - offset1ToMondayConstant);
+	}
+
+	private Calendar getCalendarFromZeiten(String datum, JSONObject zeiten, String part) throws java.text.ParseException{
+
+		Calendar day = new GregorianCalendar();
+		day.setTime(dateFormat_dateOnly.parse(datum));
+		
+		Calendar cal = new GregorianCalendar();
+		cal.setTimeInMillis(((Time) zeiten.get(part)).getTime());
+		
+		cal.set(Calendar.YEAR, day.get(Calendar.YEAR));
+		cal.set(Calendar.MONTH, day.get(Calendar.MONTH));
+		cal.set(Calendar.DATE, day.get(Calendar.DATE));
+		
+		return cal;
+	}
+	
+	@SuppressWarnings( "unchecked" )
+	private JSONObject createAppointmentJSON(Calendar slot, ResultSet dbResults, DateFormat dateFormat) throws SQLException{
+		JSONObject termin = new JSONObject();
+		termin.put("SLOT", dateFormat.format(slot.getTime()));
+		
+		JSONObject berater = new JSONObject();
+		berater.put("ID", dbResults.getLong(1));
+		berater.put("TYP", dbResults.getString(2));
+		berater.put("ANREDE", dbResults.getString(3));
+		berater.put("NAME", dbResults.getString(4));
+		berater.put("VORNAME", dbResults.getString(5));
+		berater.put("EMAIL", dbResults.getString(6));
+		berater.put("TELEFON", dbResults.getString(7));
+		berater.put("PROFILBILD", dbResults.getString(8));
+		
+		termin.put("BERATER", berater);
+		
+		return termin;
+	}
+	
 }
