@@ -13,6 +13,7 @@
   <link rel="stylesheet" type="text/css" href="css/confirmDate.css">
   <script src="js/flatpickr.js"></script>
   <script src="js/confirmDate.js"></script>
+  <script src="js/moment.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js" type="text/javascript"></script>
   <script type="text/javascript">WebFont.load({
   google: {
@@ -44,8 +45,10 @@
       <div data-ix="fade-in-bottom-page-loads"><a class="button" href="#Terminwahl">Termin Festlegen</a><a class="all-caps hollow-button" href="#Help">Hilfe</a></div>
     </div>
   </div>
+  
+  
   <div class="section" id="Terminwahl">
-    <div class="w-container">
+    <div id="success-dataFound-anfrage" class="w-container" style="display:none">
       <div class="section-title-group">
         <div class="center section-subheading subheading-terminwahl">Geben Sie Hier ihren Wunschtermin an:</div>
       </div>
@@ -68,6 +71,9 @@
 					<h4><span>Verfügbare Termine am </span><strong>%DATUM%</strong><span></span></h4>
 					<div id="availableAppointments1list">
 						<!-- Programmatically inserted -->
+					</div>
+					<div id="noAppointmentsAvailable1" style="display:none">
+						<p>Für das ausgewählte Datum sind keine Termine mehr frei!</p>
 					</div>
 				</div>
             </div>
@@ -108,6 +114,9 @@
 					<div id="availableAppointments2list">
 						<!-- Programmatically inserted -->
 					</div>
+					<div id="noAppointmentsAvailable2" style="display:none">
+						<p>Für das ausgewählte Datum sind keine Termine mehr frei!</p>
+					</div>
 				</div>
             </div>
             
@@ -147,6 +156,9 @@
 					<div id="availableAppointments3list">
 						<!-- Programmatically inserted -->
 					</div>
+					<div id="noAppointmentsAvailable3" style="display:none">
+						<p>Für das ausgewählte Datum sind keine Termine mehr frei!</p>
+					</div>
 				</div>
             </div>
             <!-- Calendar END -->
@@ -169,9 +181,27 @@
       </div>
       <!-- Appointment 3 ENDE -->
       
-      
-      <div data-ix="fade-in-bottom-page-loads"><a class="button buttonwide" data-ix="modal-show" href="#">Termin-Zusammenfassung anzeigen</a></div>
-    </div>
+    <!-- Erst anzeigen, wenn alle 3 Termine ausgewählt wurden -->
+    <div id="SummaryDisplayButton" data-ix="fade-in-bottom-page-loads" style="display:none"><a class="button buttonwide" data-ix="modal-show" href="#">Termin-Zusammenfassung anzeigen</a></div>
+    </div> 
+    <!-- ENDE -->
+    
+  	<div id="fail-nodata-anfrage" class="w-container" style="display:none">
+  		<table>
+  			<tr>
+  				<td style="width:10%"></td>
+  				<td style="width:35%"><img src="images/Typing_Monkey.png"></td>
+  				<td style="width:10%"></td>
+  				<td style="width:35%">
+  					<h3>Fehler aufgereten</h3>
+  					<p>Bei der Verarbeitung ist entweder ein Fehler aufgereten oder es sind gar keine Termine in den nächsten 3 Wochen beim ausgewählten Amt mehr frei.</p>
+  					<p></p>
+  					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="/misc/weitereInformationen.html">'Weitere Informationen'</a>).</p>
+  				</td>
+  				<td style="width:10%"></td>
+  			</tr>
+  		</table>
+  	</div>
   </div>
   <div class="section" id="Help">
     <div class="w-container">
@@ -333,10 +363,295 @@
   </script>
   <script src="js/webflow.js" type="text/javascript"></script>
   <script>
-  
-	function addTemplate(node, datum, datenr, slotnr, timefrom, timeto,
-							   ma_id, ma_image, ma_vorname, ma_nachname, ma_telefon, ma_mail, ma_position){
-		jQuery.get('Templates/HTML-Snippets/Terminvorschlag.html', function(template) {
+	var host = "localhost";
+	var moeglicheTermine;
+	var moeglicheTermin_datumsliste;
+	
+	var picker1;
+	var picker2;
+	var picker3;
+	
+	$().ready(function(){
+		var errOcc = false;
+		
+		$( "#fail-nodata-anfrage" ).hide( "fast" );
+		$( "#success-dataFound-anfrage" ).hide( "fast" );
+		
+		var urlParams = getUrlParams();
+		
+		$.ajax({
+	    	headers: { 
+	    	    "Accept": "application/json",
+	        	"Content-Type": "application/json"
+	    	},
+		  	url: "http://" + host + ":8080/requestHandler/rest/request/getData/MoeglicheTermine/?user=AVP_Frontend&userAuth=test",
+	    	type: "POST",
+	    	dataType: "json",
+	    	data: "{" + 
+	    			"\"variables\": {" + 
+	    								"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + "," + 
+	    								"\"SERVICE_ID\":" + urlParams.SERVICE + 
+	    								"\"AMTS_ID\":" + urlParams.ID +
+	    							"}" + 
+	    		   "}"
+		})
+		.fail(function(data){
+			errOcc = true;
+			
+	  		if ( console && console.log ) {
+	  	  		console.log( data );
+	  	  	}
+		})
+		.done(function( data ) {
+  			moeglicheTermine = data.RESULT;
+  			
+  			moeglicheTermin_datumsliste = moeglicheTermine.reduce(function(keys, element){ 
+  			    for (key in element) {
+  			       keys.push(moment(key, "DD.MM.YYYY").format("DD.MM.YYYY"));
+  			    } 
+  			    return keys; 
+  			},[]);
+  			
+  			createPicker1();
+  			createPicker2();
+  			createPicker3();
+		})
+		.always(function() {
+    		if(errOcc){
+  	  			$( "#fail-nodata-anfrage" ).show( "fast" );
+				$( "#success-dataFound-anfrage" ).hide( "fast" );
+    		}else{
+  	  			$( "#fail-nodata-anfrage" ).hide( "fast" );
+				$( "#success-dataFound-anfrage" ).show( "fast" );
+			}
+	  	});
+	});
+	
+	function sortFunction(a, b) {
+	    if (a[0] === b[0]) {
+	        return 0;
+	    }
+	    else {
+	        return (a[0] < b[0]) ? -1 : 1;
+	    }
+	}
+	
+	function createPicker1(){
+		picker1 = flatpickr('#calendarElement1', { 
+			dateFormat: 'd.m.Y',
+			minDate: "today",
+			maxDate: new Date().fp_incr(21),
+			disable: [
+		        function(date) {
+		            return (date.getDay() === 6 || date.getDay() === 0);
+		        }
+		    ],
+		    locale: {
+		        firstDayOfWeek: 1 
+		    },
+		  	onChange: function(selectedDates, dateStr, instance) {
+	        	$("#availableAppointments1").find("h4").find("strong").text(dateStr);
+
+	        	$("#availableAppointments1list").empty();
+	        	
+	        	
+	    		for(var counter in moeglicheTermine){
+					if(dateStr == Object.keys(moeglicheTermine[counter])[0]){
+		    			var terminListe = moeglicheTermine[counter][dateStr];
+		    			
+		    			if(Object.keys(terminListe).length === 0 && terminListe.constructor === Object){
+		    				$( "#noAppointmentsAvailable1" ).show( 'fast' );
+		    			}else{
+		    				$( "#noAppointmentsAvailable1" ).hide( 'fast' );
+		    				
+			    			var sortable = [];
+			    			for (var t in terminListe) {
+			    			    sortable.push([t, terminListe[t]]);
+			    			}
+			    			
+		    				var terminListeSorted = sortable.sort(sortFunction);
+
+		    				$( "#availableAppointments1list" ).empty();
+		    				$( "#selectedEmployee1" ).empty();
+		    				
+			    			for(var counter2 in terminListeSorted){
+			    				addTemplate($( "#availableAppointments1list" ), 
+			    							terminListeSorted[counter2][1].SLOT.ANZEIGE, 
+			    							1, 
+			    							counter2, 
+			    							terminListeSorted[counter2][1].SLOT.VON, 
+			    							terminListeSorted[counter2][1].SLOT.BIS, 
+			    							terminListeSorted[counter2][1].BERATER.ID, 
+			    							terminListeSorted[counter2][1].BERATER.PROFILBILD.length == 0 ? "images/Profilbilder/Placeholder.PNG" : terminListeSorted[counter2][1].BERATER.PROFILBILD, 
+			    							terminListeSorted[counter2][1].BERATER.VORNAME, 
+			    							terminListeSorted[counter2][1].BERATER.NAME, 
+			    							terminListeSorted[counter2][1].BERATER.TELEFON, 
+			    							terminListeSorted[counter2][1].BERATER.EMAIL, 
+			    							terminListeSorted[counter2][1].BERATER.TYP);
+			    			}
+		    			}
+					}
+	    		}
+	      		
+	        	$("#availableAppointments1").show('fast');
+	    	},
+	    	onDayCreate: function(dObj, dStr, fp, dayElem){
+	    		var date = moment(dayElem.dateObj);
+	    		
+	    		for(var counter in moeglicheTermin_datumsliste){
+					if(date.format('DD.MM.YYYY') == moeglicheTermin_datumsliste[counter]){
+						if(Object.keys(moeglicheTermine[counter][date.format('DD.MM.YYYY')]).length > 0 && moeglicheTermine[counter][date.format('DD.MM.YYYY')].constructor === Object){
+			    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+						}
+					}
+	    		}
+	    	},
+	    	inline: true
+		   });
+	}
+	
+	function createPicker2(){
+		picker2 = flatpickr('#calendarElement2', { 
+			dateFormat: 'd.m.Y',
+			minDate: "today",
+			maxDate: new Date().fp_incr(21),
+			disable: [
+		        function(date) {
+		            return (date.getDay() === 6 || date.getDay() === 0);
+		        }
+		    ],
+		    locale: {
+		        firstDayOfWeek: 1 
+		    },
+		  	onChange: function(selectedDates, dateStr, instance) {
+	        	$("#availableAppointments2").find("h4").find("strong").text(dateStr);
+
+	        	$("#availableAppointments2list").empty();
+	        	
+	    		for(var counter in moeglicheTermine){
+					if(dateStr == Object.keys(moeglicheTermine[counter])[0]){
+		    			var terminListe = moeglicheTermine[counter][dateStr];
+		    			
+		    			if(Object.keys(terminListe).length === 0 && terminListe.constructor === Object){
+		    				$( "#noAppointmentsAvailable2" ).show( 'fast' );
+		    			}else{
+		    				$( "#noAppointmentsAvailable2" ).hide( 'fast' );
+		    				
+			    			var sortable = [];
+			    			for (var t in terminListe) {
+			    			    sortable.push([t, terminListe[t]]);
+			    			}
+			    			
+		    				var terminListeSorted = sortable.sort(sortFunction);
+
+		    				$( "#availableAppointments2list" ).empty();
+		    				$( "#selectedEmployee2" ).empty();
+		    				
+			    			for(var counter2 in terminListeSorted){
+			    				addTemplate($( "#availableAppointments2list" ), 
+			    							terminListeSorted[counter2][1].SLOT.ANZEIGE, 
+			    							2, 
+			    							counter2, 
+			    							terminListeSorted[counter2][1].SLOT.VON, 
+			    							terminListeSorted[counter2][1].SLOT.BIS, 
+			    							terminListeSorted[counter2][1].BERATER.ID, 
+			    							terminListeSorted[counter2][1].BERATER.PROFILBILD.length == 0 ? "images/Profilbilder/Placeholder.PNG" : terminListeSorted[counter2][1].BERATER.PROFILBILD, 
+			    							terminListeSorted[counter2][1].BERATER.VORNAME, 
+			    							terminListeSorted[counter2][1].BERATER.NAME, 
+			    							terminListeSorted[counter2][1].BERATER.TELEFON, 
+			    							terminListeSorted[counter2][1].BERATER.EMAIL, 
+			    							terminListeSorted[counter2][1].BERATER.TYP);
+			    			}
+		    			}
+					}
+	    		}
+	        	$("#availableAppointments2").show('fast');
+	    	},
+	    	onDayCreate: function(dObj, dStr, fp, dayElem){
+	    		var date = moment(dayElem.dateObj);
+	    		
+	    		for(var counter in moeglicheTermin_datumsliste){
+					if(date.format('DD.MM.YYYY') == moeglicheTermin_datumsliste[counter]){
+		    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+					}
+	    		}
+	    	},
+	    	inline: true
+		   });
+	}
+	
+	function createPicker3(){
+		picker3 = flatpickr('#calendarElement3', { 
+			dateFormat: 'd.m.Y',
+			minDate: "today",
+			maxDate: new Date().fp_incr(21),
+			disable: [
+		        function(date) {
+		            return (date.getDay() === 6 || date.getDay() === 0);
+		        }
+		    ],
+		    locale: {
+		        firstDayOfWeek: 1 
+		    },
+		  	onChange: function(selectedDates, dateStr, instance) {
+	        	$("#availableAppointments3").find("h4").find("strong").text(dateStr);
+	        	$( "#availableAppointments3list" ).empty();
+	        	
+	    		for(var counter in moeglicheTermine){
+					if(dateStr == Object.keys(moeglicheTermine[counter])[0]){
+		    			var terminListe = moeglicheTermine[counter][dateStr];
+
+		    			if(Object.keys(terminListe).length === 0 && terminListe.constructor === Object){
+		    				$( "#noAppointmentsAvailable3" ).show( 'fast' );
+		    			}else{
+		    				$( "#noAppointmentsAvailable3" ).hide( 'fast' );
+		    				
+			    			var sortable = [];
+			    			for (var t in terminListe) {
+			    			    sortable.push([t, terminListe[t]]);
+			    			}
+			    			
+		    				var terminListeSorted = sortable.sort(sortFunction);
+
+		    				$( "#availableAppointments3list" ).empty();
+		    				$( "#selectedEmployee3" ).empty();
+		    				
+			    			for(var counter2 in terminListeSorted){
+			    				addTemplate($( "#availableAppointments3list" ), 
+			    							terminListeSorted[counter2][1].SLOT.ANZEIGE, 
+			    							3, 
+			    							counter2, 
+			    							terminListeSorted[counter2][1].SLOT.VON, 
+			    							terminListeSorted[counter2][1].SLOT.BIS, 
+			    							terminListeSorted[counter2][1].BERATER.ID, 
+			    							terminListeSorted[counter2][1].BERATER.PROFILBILD.length == 0 ? "images/Profilbilder/Placeholder.PNG" : terminListeSorted[counter2][1].BERATER.PROFILBILD, 
+			    							terminListeSorted[counter2][1].BERATER.VORNAME, 
+			    							terminListeSorted[counter2][1].BERATER.NAME, 
+			    							terminListeSorted[counter2][1].BERATER.TELEFON, 
+			    							terminListeSorted[counter2][1].BERATER.EMAIL, 
+			    							terminListeSorted[counter2][1].BERATER.TYP);
+			    			}
+		    			}
+					}
+	    		}$("#availableAppointments3").show('fast');
+	    	},
+	    	onDayCreate: function(dObj, dStr, fp, dayElem){
+	    		var date = moment(dayElem.dateObj);
+	    		
+	    		for(var counter in moeglicheTermin_datumsliste){
+					if(date.format('DD.MM.YYYY') == moeglicheTermin_datumsliste[counter]){
+		    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+					}
+	    		}
+    	},
+    	inline: true
+	   });
+	}
+  	
+  	
+  	function addTemplate(node, datum, datenr, slotnr, timefrom, timeto,
+			   ma_id, ma_image, ma_vorname, ma_nachname, ma_telefon, ma_mail, ma_position){
+  		jQuery.get('Templates/HTML-Snippets/Terminvorschlag.html', function(template) {
 			   
 			var filledInTemplate = template.replace("%DATUM%", datum);
 		 	filledInTemplate = filledInTemplate.replace("%DATENR%", datenr);
@@ -359,14 +674,10 @@
 		 	node.append(filledInTemplate);  
 		});
 	}
-
+	
 	  
 	function addTemplateMA(node, id, image, vorname, nachname, telefon, mail, position){
 		jQuery.get('Templates/HTML-Snippets/Mitarbeiter.html', function(template) {
-			   
-			
-			console.log(vorname);
-			console.log(nachname);
 			
 			var filledInTemplate = template.replace("%ID%", id);
 		 	filledInTemplate = filledInTemplate.replace("%IMAGE%", image);
@@ -379,105 +690,8 @@
 		 	node.append(filledInTemplate);  
 		});
 	}
-  	
-	var picker1 = flatpickr('#calendarElement1', { 
-			dateFormat: 'd.m.Y',
-			minDate: "today",
-			maxDate: new Date().fp_incr(21),
-			disable: [
-		        function(date) {
-		            // return true to disable
-		            return (date.getDay() === 6 || date.getDay() === 0);
-
-		        }
-		    ],
-		    locale: {
-		        firstDayOfWeek: 1 
-		    },
-		  	onChange: function(selectedDates, dateStr, instance) {
-	        	$("#availableAppointments1").find("h4").find("strong").text(dateStr);
-
-	        	$("#availableAppointments1list").empty();
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 1, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 2, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
-	      		addTemplate($( "#availableAppointments1list" ), dateStr, 1, 5, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
-	      		
-	        	$("#availableAppointments1").show('fast');
-	    	},
-	    	onDayCreate: function(dObj, dStr, fp, dayElem){
-	    		if (Math.random() < 0.15){
-	    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
-	    		}
-	    	},
-	    	inline: true
-		   });
-  
-	var picker2 = flatpickr('#calendarElement2', { 
-			dateFormat: 'd.m.Y',
-			minDate: "today",
-			maxDate: new Date().fp_incr(21),
-			disable: [
-		        function(date) {
-		            // return true to disable
-		            return (date.getDay() === 6 || date.getDay() === 0);
-
-		        }
-		    ],
-		    locale: {
-		        firstDayOfWeek: 1 
-		    },
-		  	onChange: function(selectedDates, dateStr, instance) {
-	        	$("#availableAppointments2").find("h4").find("strong").text(dateStr);
-
-	        	$("#availableAppointments2list").empty();
-	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 1, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
-	      		addTemplate($( "#availableAppointments2list" ), dateStr, 2, 2, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
-	        	
-	        	$("#availableAppointments2").show('fast');
-	    	},
-	    	onDayCreate: function(dObj, dStr, fp, dayElem){
-	    		if (Math.random() < 0.15){
-	    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
-	    		}
-	    	},
-	    	inline: true
-		   });
 	
-  	var picker3 = flatpickr('#calendarElement3', { 
-			dateFormat: 'd.m.Y',
-			minDate: "today",
-			maxDate: new Date().fp_incr(21),
-			disable: [
-		        function(date) {
-		            // return true to disable
-		            return (date.getDay() === 6 || date.getDay() === 0);
-
-		        }
-		    ],
-		    locale: {
-		        firstDayOfWeek: 1 
-		    },
-		  	onChange: function(selectedDates, dateStr, instance) {
-	        	$("#availableAppointments3").find("h4").find("strong").text(dateStr);
-
-	        	$( "#availableAppointments3list" ).empty();
-	        	
-	        	//TODO: CALL Service to get List of possible Appointments
-	      		addTemplate($( "#availableAppointments3list" ), dateStr, 3, 1, "08:00", "08:15", "1", "images/xing-profile-photo-p-500x661.png", "Maximilian", "Trösch", "+352 671 046 324", "maxirodriguez@me.com", "Bereichsleiter");
-	        	$("#availableAppointments3").show('fast');
-	    	},
-	    	onDayCreate: function(dObj, dStr, fp, dayElem){
-	    		if (Math.random() < 0.15){
-	    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
-	    		}
-    	},
-    	inline: true
-	   });
-  	
   	function setTime(nodeName, dateNr, slotNr){
-		console.log(slotNr);
-  		
-  		
       	$("#calendar" + dateNr + "Wrapper").hide('fast');
       	
       	var uhrzeitText = $( nodeName ).find("h5").text();
@@ -490,8 +704,11 @@
       	$("#appointment" + dateNr + "Selected").text(dateStr + ", " + uhrzeitText);
       	$("#appointment" + dateNr + "Selected").show('fast');   
       	
-      	console.log( $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_VORNAME").text());
-      	console.log( $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_NACHNAME").text());
+      	if($("#appointment1Selected").is(":visible") &&
+      			$("#appointment2Selected").is(":visible") &&
+      			$("#appointment3Selected").is(":visible")){
+      		$( "#SummaryDisplayButton" ).show( 'slow' ); 
+      	}
       	
       	addTemplateMA($( "#selectedEmployee" + dateNr ), 
       				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_ID").text(), 
@@ -504,6 +721,22 @@
       				  
       	$("#appointmentconnectedemployee" + dateNr).show('fast');
     }
+	
+	function getUrlParams(){
+		var params = {};
+
+		if (location.search) {
+		    var parts = location.search.substring(1).split('&');
+
+		    for (var i = 0; i < parts.length; i++) {
+		        var nv = parts[i].split('=');
+		        if (!nv[0]) continue;
+		        params[nv[0]] = nv[1] || true;
+		    }
+		}
+		
+		return params;
+	}
   </script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
 </body>

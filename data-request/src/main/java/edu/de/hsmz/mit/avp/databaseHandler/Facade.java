@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,8 +34,10 @@ import edu.de.hsmz.mit.avp.dataHandler.model.STATUSENUM;
 
 public class Facade {
 	SimpleDateFormat dateFormat_dateOnly = new SimpleDateFormat("dd.MM.yyyy");
-	SimpleDateFormat dateFormat_hourOnly = new SimpleDateFormat("HH:mm:ss");
+	SimpleDateFormat dateFormat_dateOnly_sql = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat dateFormat_timeOnly = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat dateFormat_dateTime = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	int slotDauer = 30;
 	
 	public static long logRequest(Request req){
 		String insertRequestSQL = "INSERT INTO PUBLIC.LOGGING (REQUEST_UUID, REQUEST_CALLERNAME, REQUEST_TIMESTAMP, REQUEST_TYPE, REQUEST_DATAOBJEKT, REQUEST_FULLURL, REQUEST_PAYLOAD, RESPONSE_STATUS) " +
@@ -627,8 +628,11 @@ public class Facade {
 	
 
 	@SuppressWarnings("unchecked")
-	private HashMap<String, JSONObject> getAlleTerminFuerMitarbeiterAnTag(String datum, long berater_id){	
-		String selectSQL = "SELECT ID, DATUM, UHRZEIT, BERATER_ID, AMTS_ID, SERVICE_ID FROM PUBLIC.TERMINE WHERE BERATER_ID = " + berater_id + ";";
+	private HashMap<String, JSONObject> getAlleTerminFuerMitarbeiterAnTag(String datum, long berater_id) throws java.text.ParseException{	
+		Calendar day = new GregorianCalendar();
+		day.setTime(dateFormat_dateOnly.parse(datum));
+		
+		String selectSQL = "SELECT ID, DATUM, UHRZEIT, BERATER_ID, AMTS_ID, SERVICE_ID FROM PUBLIC.TERMINE WHERE BERATER_ID = " + berater_id + " AND DATUM = DATE '" + dateFormat_dateOnly_sql.format(day.getTime()) + "';";
 		
 		HashMap<String, JSONObject> result = new HashMap<String, JSONObject>();
 		
@@ -647,7 +651,7 @@ public class Facade {
 				termin.put("AMTS_ID", dbResults.getLong(5));
 				termin.put("SERVICE_ID", dbResults.getLong(6));
 				
-				String uhrzeitTxt = dateFormat_hourOnly.format(dbResults.getTime(3).getTime());
+				String uhrzeitTxt = dateFormat_timeOnly.format(dbResults.getTime(3).getTime());
 				result.put(uhrzeitTxt, termin);
 			}
 			
@@ -736,9 +740,9 @@ public class Facade {
 					
 					while(morgen_von.before(morgen_bis)){
 						if(!moeglicheTermine_mitarbeier.containsKey(dateFormat_dateTime.format(morgen_von.getTime()))){
-							moeglicheTermine_mitarbeier.put(dateFormat_hourOnly.format(morgen_von.getTime()), createAppointmentJSON(morgen_von, dbResults, dateFormat_dateTime));
+							moeglicheTermine_mitarbeier.put(dateFormat_timeOnly.format(morgen_von.getTime()), createAppointmentJSON((Calendar) morgen_von.clone(), dbResults));
 						}
-						morgen_von.add(Calendar.MINUTE, 15);
+						morgen_von.add(Calendar.MINUTE, slotDauer);
 					}
 					
 					Calendar mittag_von = getCalendarFromZeiten(datum, arbeitszeit, "MITTAG_VON").after(getCalendarFromZeiten(datum, oeffnungszeiten, "MITTAG_VON")) ?
@@ -749,28 +753,46 @@ public class Facade {
 							  			  getCalendarFromZeiten(datum, arbeitszeit, "MITTAG_BIS") : 
 							  			  getCalendarFromZeiten(datum, oeffnungszeiten, "MITTAG_BIS");
 					
-					while(mittag_von.before(mittag_bis.getTime())){
+					while(mittag_von.before(mittag_bis)){
 						if(!moeglicheTermine_mitarbeier.containsKey(dateFormat_dateTime.format(mittag_von.getTime()))){
-							moeglicheTermine_mitarbeier.put(dateFormat_hourOnly.format(mittag_von), createAppointmentJSON(mittag_von, dbResults, dateFormat_dateTime));
+							moeglicheTermine_mitarbeier.put(dateFormat_timeOnly.format(mittag_von.getTime()), createAppointmentJSON((Calendar) mittag_von.clone(), dbResults));
 						}
-						mittag_von.add(Calendar.MINUTE, 15);
+						mittag_von.add(Calendar.MINUTE, slotDauer);
 					}
 					
 				
 					//PRO MA: Einträge aus Hashmao entfernen, wo bereits Termine liegen
-				
+					HashMap<String, JSONObject> termineAmTag = getAlleTerminFuerMitarbeiterAnTag(datum, dbResults.getLong(1));
+					if(termineAmTag != null && !termineAmTag.isEmpty()){
+						for (String termin : termineAmTag.keySet()) {
+						   if(moeglicheTermine_mitarbeier.containsKey(termin)){
+							   moeglicheTermine_mitarbeier.remove(termin);
+						   }
+						}
+					}
+					
 					//PRO MA: Termine in globale Hashmap überführen, falls noch nicht vorhanden
-					moeglicheTermine_global.putAll(moeglicheTermine_mitarbeier);
+					addEinmaligeTermine(moeglicheTermine_global, moeglicheTermine_mitarbeier);
 				}
-				
 			} catch (Exception e) {
 		        throw new RuntimeException(e.getMessage());
 			}
 		}catch(java.text.ParseException e){
 	        throw new RuntimeException(e.getMessage());
 		}
+
+		
 		
 		return moeglicheTermine_global;
+	}
+	
+	private void addEinmaligeTermine(HashMap<String, JSONObject> target,
+									 HashMap<String, JSONObject> patch) {
+		
+		HashMap<String, JSONObject> tmp = new HashMap<String, JSONObject>(patch);
+		tmp.keySet().removeAll(target.keySet());
+		
+		target.putAll(tmp);
 	}
 
 	private long getDayOfTheWeekFromDate(String datum) throws java.text.ParseException {
@@ -801,9 +823,18 @@ public class Facade {
 	}
 	
 	@SuppressWarnings( "unchecked" )
-	private JSONObject createAppointmentJSON(Calendar slot, ResultSet dbResults, DateFormat dateFormat) throws SQLException{
+	private JSONObject createAppointmentJSON(Calendar cal, ResultSet dbResults) throws SQLException{
 		JSONObject termin = new JSONObject();
-		termin.put("SLOT", dateFormat.format(slot.getTime()));
+		
+		String von = dateFormat_timeOnly.format(cal.getTime());
+		cal.add(Calendar.MINUTE, slotDauer);
+		String bis = dateFormat_timeOnly.format(cal.getTime());
+		
+		JSONObject slot = new JSONObject();
+		slot.put("VON", von);
+		slot.put("BIS", bis);
+		slot.put("ANZEIGE", von + " - " + bis);
+		termin.put("SLOT", slot);
 		
 		JSONObject berater = new JSONObject();
 		berater.put("ID", dbResults.getLong(1));
@@ -818,6 +849,165 @@ public class Facade {
 		termin.put("BERATER", berater);
 		
 		return termin;
+	}
+
+	@SuppressWarnings("unchecked")
+	public JSONArray addAppointment(long BERATUNGSGEBIET_ID, 
+									long SERVICE_ID,
+									long AMTSART_ID, 
+									long AMT_ID, 
+									long MITARBEITER_ID,
+									String TERMIN_DATUMUNDUHRZEIT,
+									long TERMIN_GROUP_ID) {
+		
+		JSONObject quittung = new JSONObject();
+		try{
+			/*
+			 *  Volle Kette checken:
+			 *  
+			 *  - Gehört der Service zum Beratungsgebiet
+			 *  - Gehört das Amt zur Amtsart
+			 *  - Berät das Amt den Service
+			 *  - Arbeitet der Mitarbeiter beim Amt
+			 *  - Mitarbeiter berät Service
+			 *  - Maximal 2 bereits bestehende Einträge zur TERMIN_GROUP_ID
+			 *  
+			 *  ==> Unstimmigkeit: Fehler werfen!
+			 *
+			 */
+			
+			
+			boolean servicePasstZumBeratungsgebiet = checkServiceGegenBeratungsgebiet(SERVICE_ID, BERATUNGSGEBIET_ID);
+			if(servicePasstZumBeratungsgebiet){
+				boolean amtPasstZurAmtsart = checkAmtGegenAmtsart(AMT_ID, AMTSART_ID);
+				if(amtPasstZurAmtsart){
+					boolean amtBeraetService = checkAmtGegenService(AMT_ID, SERVICE_ID);
+					if(amtBeraetService){
+						boolean mitarbeiterArbeitetBeiAmt = checkMitarbeiterGegenAmt(MITARBEITER_ID, AMT_ID);
+						if(mitarbeiterArbeitetBeiAmt){
+							boolean mitarbeiterBeraetService = checkMitarbeiterGegenService(MITARBEITER_ID, SERVICE_ID);
+							if(!mitarbeiterBeraetService){
+								boolean anzahlTermineDerGruppeKleinerDrei = checkAnzahlTermineInGruppe(TERMIN_GROUP_ID, 2);
+								if(!anzahlTermineDerGruppeKleinerDrei){
+									throw new RuntimeException("Anfrage ungültig: Es existieren bereits 3 oder mehr Termine zu Ihrer Anfrage (TERMIN_GROUP_ID = '" + TERMIN_GROUP_ID + "')!\n" +
+			   				   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+				}
+							}else{
+								throw new RuntimeException("Anfrage ungültig: Der ausgewählte Mitarbeiter (ID = '" + MITARBEITER_ID + "') passt nicht zum ausgewählten Service (ID = '" + SERVICE_ID + "')!\n" +
+						   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+							}
+						}else{
+							throw new RuntimeException("Anfrage ungültig: Der ausgewählte Mitarbeiter (ID = '" + MITARBEITER_ID + "') passt nicht zum ausgewählten Amt (ID = '" + AMT_ID + "')!\n" +
+					   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+						}
+					}else{
+						throw new RuntimeException("Anfrage ungültig: Das ausgewählte Amt (ID = '" + AMT_ID + "') passt nicht zum ausgewählten Service (ID = '" + SERVICE_ID + "')!\n" +
+				   				   				  "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+					}
+				}else{
+					throw new RuntimeException("Anfrage ungültig: Das ausgewählte Amt (ID = '" + AMT_ID + "') passt nicht zur ausgewählten Amtsart (ID = '" + AMTSART_ID + "')!\n" +
+							   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+				}
+			}else{
+				throw new RuntimeException("Anfrage ungültig: Der ausgewählte Service (ID = '" + SERVICE_ID + "') passt nicht zum ausgewählten Beratunggebiet (ID = '" + BERATUNGSGEBIET_ID + "')!\n" +
+										   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+			}
+			
+			
+			/*
+			 * Prüfung: Ist der übergebene Termin noch frei
+			 * 
+			 * ==> Ja: 
+			 * 			- In der Datenbank anlegen
+			 * 			- Termin neu auslesen
+			 * 			- Prüfen, ob Daten korrekt eingetragen wurden (Für den Fall von Mehrfachzugriffen)
+			 * 
+			 * 			==> Ja - Positive Quittung zurück geben
+			 * 			==> Nein - Fehler werfen
+			 * 
+			 * ==> Nein: 
+			 * 
+			 * 			- Nein - Negative Quittung zurück geben
+			 */
+			
+			JSONObject termin = createTermin(BERATUNGSGEBIET_ID, 
+										    SERVICE_ID,
+										    AMTSART_ID, 
+										    AMT_ID, 
+										    MITARBEITER_ID,	
+										    TERMIN_DATUMUNDUHRZEIT);
+			
+			if(termin != null && termin.get("ID") != null && termin.get("SALT") != null){
+				boolean terminIsFrei = checkTerminGegenMitarbeiterAmtDatum((long) termin.get("ID"), MITARBEITER_ID, AMT_ID, TERMIN_DATUMUNDUHRZEIT);
+				if(terminIsFrei){
+					quittung.put("STATUS", "OKAY");
+					quittung.put("TERMIN_ID", (long) termin.get("ID"));
+					quittung.put("TERMIN_SALT", (String) termin.get("SALT"));
+				}else{
+					throw new RuntimeException("Der Terminwunsch konnte nicht korrekt verarbeitet werden. Bitte versuchen Sie es erneut.\n" +
+											   "Wenn der Fehler wiederholt auftritt, wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>').");
+				}
+			}else{
+				throw new RuntimeException("Der Terminwunsch konnte nicht korrekt verarbeitet werden: Der Termin konnte nicht angelegt werden. Bitte versuchen Sie es erneut.\n" +
+						   				   "Wenn der Fehler wiederholt auftritt, wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>').");
+			}
+		}catch(Exception e){
+			quittung.put("STATUS", "ERROR");
+			quittung.put("ERRORMESSAGE", e.getMessage());
+		}
+		
+		JSONArray result = new JSONArray();
+		result.add(quittung);
+		
+		return result;
+	}
+
+	private boolean checkAnzahlTermineInGruppe(long tERMIN_GROUP_ID, int i) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private JSONObject createTermin(long BERATUNGSGEBIET_ID, 
+									long SERVICE_ID, 
+									long AMTSART_ID, 
+									long AMT_ID,
+									long MITARBEITER_ID, 
+									String TERMIN_DATUMUNDUHRZEIT) {
+		JSONObject result = new JSONObject();
+		
+		// TODO Add Logic here
+		
+		return result;
+	}
+
+	private boolean checkTerminGegenMitarbeiterAmtDatum(long TERMIN_ID, long MITARBEITER_ID, long AMT_ID, String tERMIN_DATUMUNDUHRZEIT) {
+		// TODO Add Logic here
+		return false;
+	}
+
+	private boolean checkMitarbeiterGegenService(long MITARBEITER_ID, long SERVICE_ID) {
+		// TODO Add Logic here
+		return false;
+	}
+
+	private boolean checkMitarbeiterGegenAmt(long MITARBEITER_ID, long AMT_ID) {
+		// TODO Add Logic here
+		return false;
+	}
+
+	private boolean checkAmtGegenService(long AMT_ID, long SERVICE_ID) {
+		// TODO Add Logic here
+		return false;
+	}
+
+	private boolean checkAmtGegenAmtsart(long AMT_ID, long AMTSART_ID) {
+		// TODO Add Logic here
+		return false;
+	}
+
+	private boolean checkServiceGegenBeratungsgebiet(long SERVICE_ID, long BERATUNGSGEBIET_ID) {
+		// TODO Add Logic here
+		return false;
 	}
 	
 }

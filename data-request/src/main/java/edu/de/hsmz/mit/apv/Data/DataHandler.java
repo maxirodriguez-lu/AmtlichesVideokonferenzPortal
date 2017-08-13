@@ -38,7 +38,6 @@ public class DataHandler implements JavaDelegate{
 			
 			switch (req.getAction()) {
 				case READ:
-					
 					switch(req.getTyp()){
 						case BERATER:
 							result = databaseHandler.getSachbearbeiter();
@@ -73,11 +72,34 @@ public class DataHandler implements JavaDelegate{
 						status = STATUSENUM.OKAY;
 						break;
 					default:
-						break;
+						throw new RuntimeException(String.format("Es existiert keine Operation des Typs '%s' für die Aktion '%s'.'" + 
+					                                             "\nDer Aufruf ist in der übergebenen Form ungültig und wird nicht bearbeitet!",
+					                                             req.getAction().getText(),
+					                                             req.getTyp().getText())
+												  );
 					}
 					
 					break;
 			case ADD:
+				switch(req.getTyp()){
+					case TERMINANLEGEN:
+						result = databaseHandler.addAppointment((long) databaseHandler.extractFieldFromPayload(id, "BERATUNGSGEBIET_ID"),
+																(long) databaseHandler.extractFieldFromPayload(id, "SERVICE_ID"),
+																(long) databaseHandler.extractFieldFromPayload(id, "AMTSART_ID"),
+																(long) databaseHandler.extractFieldFromPayload(id, "AMT_ID"),
+																(long) databaseHandler.extractFieldFromPayload(id, "MITARBEITER_ID"),
+																(String) databaseHandler.extractFieldFromPayload(id, "TERMIN_DATUMUNDUHRZEIT"),
+																(long) databaseHandler.extractFieldFromPayload(id, "TERMIN_GROUP_ID")
+								);
+						status = STATUSENUM.OKAY;
+						break;
+					default:
+						throw new RuntimeException(String.format("Es existiert keine Operation des Typs '%s' für die Aktion '%s'.'" + 
+                                "\nDer Aufruf ist in der übergebenen Form ungültig und wird nicht bearbeitet!",
+                                req.getAction().getText(),
+                                req.getTyp().getText())
+				  );
+				}
 				break;
 			case DELETE:
 				break;

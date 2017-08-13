@@ -182,12 +182,7 @@
 	    	data: "{\"variables\": {\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + ", \"SERVICE_ID\":" + urlParams.ID + "}}"
 		})
 		  .fail(function(data){
-			  console.log("!");
-  			$( "#fail-nodata-anfrage" ).show( "fast" );
-    		$( "#success-dataFound-anfrage" ).hide( "fast" );
-    		
-  			$( "#fail-nodata_Aemter-anfrage" ).show( "fast" );
-    		$( "#success-dataFound_Aemter-anfrage" ).hide( "fast" );
+			errOcc = true;
   		
 	  		if ( console && console.log ) {
 	  	  		console.log( data );
@@ -261,11 +256,11 @@
 			  	});
 			  
 	    		if(errOcc){
-	    	  	  		$( "#fail-nodata-anfrage" ).show( "fast" );
-	    				$( "#success-dataFound-anfrage" ).hide( "fast" );
+    	  	  		$( "#fail-nodata-anfrage" ).show( "fast" );
+    				$( "#success-dataFound-anfrage" ).hide( "fast" );
 	    		}else{
-	    	  	  		$( "#fail-nodata-anfrage" ).hide( "fast" );
-	    				$( "#success-dataFound-anfrage" ).show( "fast" );
+    	  	  		$( "#fail-nodata-anfrage" ).hide( "fast" );
+    				$( "#success-dataFound-anfrage" ).show( "fast" );
 	    		}
 	    		
 	    		if(errOcc_Aemter){
@@ -276,9 +271,9 @@
     				$( "#success-dataFound_Aemter-anfrage" ).show( "fast" );
     		}
   	  });
-  });
+  	});
 
-	
+  	
 	function addTemplate(node, name, antwort, id){
 		jQuery.get('Templates/HTML-Snippets/Informationen.html', function(template) {
 			   
@@ -289,7 +284,6 @@
 		 	node.append(filledInTemplate);  
 		});
 	}
-
 	
 	function addTemplateAmt(node, name, adresse, plz, ort, url, image, link, filterVon, filterBis, id){
 		jQuery.get('Templates/HTML-Snippets/Amt.html', function(template) {
@@ -339,55 +333,53 @@
   });
   
    function initMap() {
-//   	if(!map){
-//   	    geocoder = new google.maps.Geocoder();
-//         map = new google.maps.Map(document.getElementById('mapPlaceHolder'), {
-//             zoom: 10,
-//             center: {lat: 59.325, lng: 18.070}
-//           });
-// 	  }
+  	if(!map){
+  	    geocoder = new google.maps.Geocoder();
+        map = new google.maps.Map(document.getElementById('mapPlaceHolder'), {
+            zoom: 10,
+            center: {lat: 59.325, lng: 18.070}
+          });
+	  }
      }
    
     function setMarker(coords){
-// 		if(marker){
-// 			marker.setMap(null);
-// 		}
-//         marker = new google.maps.Marker({
-//           map: map,
-//           draggable: true,
-//           animation: google.maps.Animation.DROP,
-//           position: coords
-//         });
-//         marker.addListener('click', toggleBounce);
+		if(marker){
+			marker.setMap(null);
+		}
+        marker = new google.maps.Marker({
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: coords
+        });
+        marker.addListener('click', toggleBounce);
         
-//         map.panTo(marker.getPosition());
+        map.panTo(marker.getPosition());
     }
 
     function toggleBounce() {
-//       if (marker.getAnimation() !== null) {
-//         marker.setAnimation(null);
-//       } else {
-//         marker.setAnimation(google.maps.Animation.BOUNCE);
-//       }
+      if (marker.getAnimation() !== null) {
+        marker.setAnimation(null);
+      } else {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+      }
     }
     
     function codeAddressAndSetMarker(name, adress) {
-//         geocoder.geocode( { 'address': adress}, function(results, status) {
-//           if (status == google.maps.GeocoderStatus.OK) {
-//           	map.setCenter(results[0].geometry.location);
-//             setMarker(results[0].geometry.location)
-//           } else {
-//             console.log('Geocode was not successful for the following reason: ' + status);
-//           }
-//         });
+        geocoder.geocode( { 'address': adress}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+          	map.setCenter(results[0].geometry.location);
+            setMarker(results[0].geometry.location)
+          } else {
+            console.log('Geocode was not successful for the following reason: ' + status);
+          }
+        });
       }
     
 	$( '#search-Start' ).click(function(event){
 		var searchKey = $( '#search-keyword' ).val();
 		console.log(searchKey);
-		
-		// TODO if isNumber
-		
+				
 		var domList = $( "[id^=Amt_]" );
 		domList.show( "slow" );
 		
