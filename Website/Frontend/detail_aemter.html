@@ -60,7 +60,7 @@
           <h2>Wunschtermin</h2>
           <p>Klicken Sie hier, um ihren Wunschtermin festzulegen ...</p>
           <div data-ix="fade-in-bottom-page-loads">
-          	<a class="button" data-ix="showcalendar" href="#">Termin Auswählen</a>
+          	<a class="button" data-ix="showcalendar" href="#appointmentContainer1">Termin Auswählen</a>
           	<a id="appointment1Selected" class="all-caps appointmentselected hollow-button" href="#">Ausgewählt</a>
             
             <!-- Calendar for Appointment 1 - set programmatically -->
@@ -102,7 +102,7 @@
           <h2>Alternativtermin 1</h2>
           <p>Klicken Sie hier, um ihren Wunschtermin festzulegen ...</p>
           <div data-ix="fade-in-bottom-page-loads">
-          	<a class="button" data-ix="showcalendar" href="#">Termin Auswählen</a>
+          	<a class="button" data-ix="showcalendar" href="#appointmentContainer2">Termin Auswählen</a>
           	<a id="appointment2Selected" class="all-caps appointmentselected hollow-button" href="#">Ausgewählt</a>
             
             <!-- Calendar for Appointment 2 - set programmatically -->
@@ -144,7 +144,7 @@
           <h2>Alternativtermin 2</h2>
           <p>Klicken Sie hier, um ihren Wunschtermin festzulegen ...</p>
           <div data-ix="fade-in-bottom-page-loads">
-          	<a class="button" data-ix="showcalendar" href="#">Termin Auswählen</a>
+          	<a class="button" data-ix="showcalendar" href="#appointmentContainer3">Termin Auswählen</a>
           	<a id="appointment3Selected" class="all-caps appointmentselected hollow-button" href="#">Ausgewählt</a>
             
             <!-- Calendar for Appointment 3 - set programmatically -->
@@ -182,7 +182,7 @@
       <!-- Appointment 3 ENDE -->
       
     <!-- Erst anzeigen, wenn alle 3 Termine ausgewählt wurden -->
-    <div id="SummaryDisplayButton" data-ix="fade-in-bottom-page-loads" style="display:none"><a class="button buttonwide" data-ix="modal-show" href="#">Termin-Zusammenfassung anzeigen</a></div>
+    <div id="SummaryDisplayButton" data-ix="fade-in-bottom-page-loads" style="display:none"><a class="button buttonwide" href="#">Termin-Zusammenfassung anzeigen</a></div>
     </div> 
     <!-- ENDE -->
     
@@ -195,6 +195,22 @@
   				<td style="width:35%">
   					<h3>Fehler aufgereten</h3>
   					<p>Bei der Verarbeitung ist entweder ein Fehler aufgereten oder es sind gar keine Termine in den nächsten 3 Wochen beim ausgewählten Amt mehr frei.</p>
+  					<p></p>
+  					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="/misc/weitereInformationen.html">'Weitere Informationen'</a>).</p>
+  				</td>
+  				<td style="width:10%"></td>
+  			</tr>
+  		</table>
+  	</div>
+  	<div id="fail-summary-error" class="w-container" style="display:none">
+  		<table>
+  			<tr>
+  				<td style="width:10%"></td>
+  				<td style="width:35%"><img src="images/Typing_Monkey.png"></td>
+  				<td style="width:10%"></td>
+  				<td style="width:35%">
+  					<h3>Fehler aufgereten</h3>
+  					<p>Bei der Verarbeitung ist ein Fehler aufgereten: Die Terminvorschau konnte nicht erzeugt werden!</p>
   					<p></p>
   					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="/misc/weitereInformationen.html">'Weitere Informationen'</a>).</p>
   				</td>
@@ -226,8 +242,10 @@
       </div>
     </div>
   </div>
-  <div class="modal-wrapper" data-ix="modal-load">
-    <div class="summary-wrapper" data-ix="nothing">
+  
+  <!-- Summary -->
+  <div id="appointmentSummary" class="modal-wrapper alwaysShowScrollbar" style="display:none">
+    <div class="summary-wrapper">
       <div class="modal-container w-container">
         <div class="section-title-group">
           <div class="center section-subheading subheading-terminwahl">Geben Sie Hier ihren Wunschtermin an:</div>
@@ -356,6 +374,8 @@
       </div>
     </div>
   </div>
+  <!-- Summary ENDE -->
+  
   <div class="center footer"></div>
   <script
 		src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"
@@ -379,6 +399,18 @@
 		
 		var urlParams = getUrlParams();
 		
+		console.log( $( "#appointment1Selected" ).text());
+		console.log( $( "#appointmentconnectedemployee1" ).find("#EmployeeID").text() );
+		
+
+		console.log( $( "#appointment2Selected" ).text());
+		console.log( $( "#appointmentconnectedemployee2" ).find("#EmployeeID").text() );
+		
+		
+		console.log( $( "#appointment2Selected" ).text());
+		console.log( $( "#appointmentconnectedemployee3" ).find("#EmployeeID").text() );
+		
+		
 		$.ajax({
 	    	headers: { 
 	    	    "Accept": "application/json",
@@ -388,10 +420,17 @@
 	    	type: "POST",
 	    	dataType: "json",
 	    	data: "{" + 
-	    			"\"variables\": {" + 
-	    								"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + "," + 
-	    								"\"SERVICE_ID\":" + urlParams.SERVICE + 
+	    			"\"variables\": {" +
 	    								"\"AMTS_ID\":" + urlParams.ID +
+	    								"\"TERMIN_1_DATUM\":" + urlParams.ID +
+	    								"\"TERMIN_1_SLOT\":" + urlParams.ID +
+	    								"\"TERMIN_1_MA_ID\":" + urlParams.ID +
+	    								"\"TERMIN_2_DATUM\":" + urlParams.ID +
+	    								"\"TERMIN_2_SLOT\":" + urlParams.ID +
+	    								"\"TERMIN_2_MA_ID\":" + urlParams.ID +
+	    								"\"TERMIN_3_DATUM\":" + urlParams.ID +
+	    								"\"TERMIN_3_SLOT\":" + urlParams.ID +
+	    								"\"TERMIN_3_MA_ID\":" + urlParams.ID +
 	    							"}" + 
 	    		   "}"
 		})
@@ -427,6 +466,60 @@
 	  	});
 	});
 	
+	$('#SummaryDisplayButton').click(function(){
+		var errOcc = false;
+		
+		var urlParams = getUrlParams();
+		
+		$.ajax({
+	    	headers: { 
+	    	    "Accept": "application/json",
+	        	"Content-Type": "application/json"
+	    	},
+		  	url: "http://" + host + ":8080/requestHandler/rest/request/getData/TerminZusammenfassung/?user=AVP_Frontend&userAuth=test",
+	    	type: "POST",
+	    	dataType: "json",
+	    	data: "{" + 
+	    			"\"variables\": {" + 
+	    								"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + "," + 
+	    								"\"SERVICE_ID\":" + urlParams.SERVICE + 
+	    								"\"AMTS_ID\":" + urlParams.ID +
+	    							"}" + 
+	    		   "}"
+		})
+		.fail(function(data){
+			errOcc = true;
+			
+	  		if ( console && console.log ) {
+	  	  		console.log( data );
+  	  			$( "#success-dataFound-anfrage" ).hide( "fast" );
+  	  			$( "#fail-summary-error" ).show('fast');
+	  	  	}
+		})
+		.done(function( data ) {
+  			terminZusammenfassung = data.RESULT;
+  			
+  			moeglicheTermin_datumsliste = moeglicheTermine.reduce(function(keys, element){ 
+  			    for (key in element) {
+  			       keys.push(moment(key, "DD.MM.YYYY").format("DD.MM.YYYY"));
+  			    } 
+  			    return keys; 
+  			},[]);
+  			
+  			createPicker1();
+  			createPicker2();
+  			createPicker3();
+		})
+		.always(function() {
+    		if(errOcc){
+  	  			$( "#success-dataFound-anfrage" ).hide( "fast" );
+  	  			$( "#fail-summary-error" ).show('fast');
+    		}else{
+  	  			$( "#appointmentSummary" ).show( "fast" );
+			}
+	  	});
+	});
+	
 	function sortFunction(a, b) {
 	    if (a[0] === b[0]) {
 	        return 0;
@@ -452,8 +545,7 @@
 		  	onChange: function(selectedDates, dateStr, instance) {
 	        	$("#availableAppointments1").find("h4").find("strong").text(dateStr);
 
-	        	$("#availableAppointments1list").empty();
-	        	
+				$( "#availableAppointments1list" ).empty();
 	        	
 	    		for(var counter in moeglicheTermine){
 					if(dateStr == Object.keys(moeglicheTermine[counter])[0]){
@@ -470,9 +562,6 @@
 			    			}
 			    			
 		    				var terminListeSorted = sortable.sort(sortFunction);
-
-		    				$( "#availableAppointments1list" ).empty();
-		    				$( "#selectedEmployee1" ).empty();
 		    				
 			    			for(var counter2 in terminListeSorted){
 			    				addTemplate($( "#availableAppointments1list" ), 
@@ -493,7 +582,10 @@
 					}
 	    		}
 	      		
-	        	$("#availableAppointments1").show('fast');
+	        	$("#availableAppointments1").show('fast', function(){
+		          	location.hash = "";
+		          	location.hash = "#availableAppointments1";
+	        	});
 	    	},
 	    	onDayCreate: function(dObj, dStr, fp, dayElem){
 	    		var date = moment(dayElem.dateObj);
@@ -526,7 +618,7 @@
 		  	onChange: function(selectedDates, dateStr, instance) {
 	        	$("#availableAppointments2").find("h4").find("strong").text(dateStr);
 
-	        	$("#availableAppointments2list").empty();
+				$( "#availableAppointments2list" ).empty();
 	        	
 	    		for(var counter in moeglicheTermine){
 					if(dateStr == Object.keys(moeglicheTermine[counter])[0]){
@@ -543,9 +635,6 @@
 			    			}
 			    			
 		    				var terminListeSorted = sortable.sort(sortFunction);
-
-		    				$( "#availableAppointments2list" ).empty();
-		    				$( "#selectedEmployee2" ).empty();
 		    				
 			    			for(var counter2 in terminListeSorted){
 			    				addTemplate($( "#availableAppointments2list" ), 
@@ -565,14 +654,19 @@
 		    			}
 					}
 	    		}
-	        	$("#availableAppointments2").show('fast');
+	        	$( "#availableAppointments2" ).show('fast', function(){
+		          	location.hash = "";
+		          	location.hash = "#availableAppointments2";
+	        	});
 	    	},
 	    	onDayCreate: function(dObj, dStr, fp, dayElem){
 	    		var date = moment(dayElem.dateObj);
 	    		
 	    		for(var counter in moeglicheTermin_datumsliste){
 					if(date.format('DD.MM.YYYY') == moeglicheTermin_datumsliste[counter]){
-		    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+						if(Object.keys(moeglicheTermine[counter][date.format('DD.MM.YYYY')]).length > 0 && moeglicheTermine[counter][date.format('DD.MM.YYYY')].constructor === Object){
+			    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+						}
 					}
 	    		}
 	    	},
@@ -595,7 +689,8 @@
 		    },
 		  	onChange: function(selectedDates, dateStr, instance) {
 	        	$("#availableAppointments3").find("h4").find("strong").text(dateStr);
-	        	$( "#availableAppointments3list" ).empty();
+
+				$( "#availableAppointments3list" ).empty();
 	        	
 	    		for(var counter in moeglicheTermine){
 					if(dateStr == Object.keys(moeglicheTermine[counter])[0]){
@@ -613,8 +708,6 @@
 			    			
 		    				var terminListeSorted = sortable.sort(sortFunction);
 
-		    				$( "#availableAppointments3list" ).empty();
-		    				$( "#selectedEmployee3" ).empty();
 		    				
 			    			for(var counter2 in terminListeSorted){
 			    				addTemplate($( "#availableAppointments3list" ), 
@@ -633,14 +726,19 @@
 			    			}
 		    			}
 					}
-	    		}$("#availableAppointments3").show('fast');
+	    		}$("#availableAppointments3").show('fast', function(){
+		          	location.hash = "";
+		          	location.hash = "#availableAppointments3";
+	    		});
 	    	},
 	    	onDayCreate: function(dObj, dStr, fp, dayElem){
 	    		var date = moment(dayElem.dateObj);
 	    		
 	    		for(var counter in moeglicheTermin_datumsliste){
 					if(date.format('DD.MM.YYYY') == moeglicheTermin_datumsliste[counter]){
-		    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+						if(Object.keys(moeglicheTermine[counter][date.format('DD.MM.YYYY')]).length > 0 && moeglicheTermine[counter][date.format('DD.MM.YYYY')].constructor === Object){
+			    			dayElem.innerHTML += "<span class='appointmentAvailable'></span>";
+						}
 					}
 	    		}
     	},
@@ -709,7 +807,9 @@
       			$("#appointment3Selected").is(":visible")){
       		$( "#SummaryDisplayButton" ).show( 'slow' ); 
       	}
-      	
+
+		$( "#selectedEmployee" + dateNr ).empty();
+		
       	addTemplateMA($( "#selectedEmployee" + dateNr ), 
       				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_ID").text(), 
       				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_IMAGE").text(), 
@@ -720,6 +820,8 @@
       				  $("#appointment_slot_" + dateNr + "_" + slotNr).find("#MA_POSITION").text());
       				  
       	$("#appointmentconnectedemployee" + dateNr).show('fast');
+      	location.hash = "";
+      	location.hash = "#appointmentContainer" +  dateNr;
     }
 	
 	function getUrlParams(){
