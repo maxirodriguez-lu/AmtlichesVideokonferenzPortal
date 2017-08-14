@@ -8,7 +8,8 @@ public enum REQUESTTYPEENUM {
 	MOEGLICHETERMINE("MoeglicheTermine"),
 	TERMINANLEGEN("TerminAnlegen"),
 	BERATER ("Berater"),
-	TERMINZUSAMMENFASSUNG("TerminZusammenfassung");
+	TERMINZUSAMMENFASSUNG("TerminZusammenfassung"),
+	APPOINTMENT_START("Appointment-start");
 	
 	private String text;
 	

@@ -985,9 +985,7 @@ p {
   position: static;
   top: 0px;
   right: 0px;
-  display: block;
   overflow: visible;
-  width: 100%;
   float: none;
   clear: both;
   text-align: right;
@@ -1015,7 +1013,7 @@ p {
   display: block;
   overflow: scroll;
   width: 80%;
-  height: 90%;
+  max-height: 90%;
   margin-right: auto;
   margin-left: auto;
   padding: 40px;
@@ -1264,4 +1262,44 @@ html.w-mod-js *[data-ix="modal-load"] {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
     -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+.success-alert {
+  margin-top: 35px;
+  border: 1px solid #30ad64;
+  border-radius: 20px;
+  margin-bottom: 50px;
+}
+
+.success-heading {
+  color: #30ad64;
+}
+
+.success-text {
+  color: #30ad64;
+}
+
+.success-box {
+  padding: 10px;
+}
+.fail-alert {
+  margin-top: 35px;
+}
+
+.fail-box {
+  padding: 10px;
+  border: 1px solid #bf3a30;
+  border-radius: 20px;
+  color: #bf3a30;
+  margin-bottom: 50px;
+}
+
+.fail-heading {
+  color: #bf3a30;
+}
+
+.fail-link {
+  font-size: 14px;
+  font-weight: 300;
+  text-decoration: none;
 }

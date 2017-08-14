@@ -21,11 +21,13 @@ public class SachbearbeiterDelegate implements JavaDelegate {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 		IdentityService identityService = processEngine.getIdentityService();
 		
-		String requestedUserId = (String) execution.getVariable( "Assignee_Req" );
-		LOGGER.info(">>> Requested Sachbearbeiter: " + requestedUserId);
-		LOGGER.info(">>> Checking Sachbearbeiter ...");
+		//Über fachliche Db die ID holen und aus der Datenbank den Ansprechpartner auslesen
+		long fachlicheId = (long) execution.getVariable( "FachlicheID" );
+		//TODO - Camundauser aus dem über die im Termin hinterlegte ID auslesen!
+		String requestedUserId = "";
+		String requestedUserTyp = "";
 		
-		List<User> userList = identityService.createUserQuery().memberOfGroup("Sachbearbeiter").list();
+		List<User> userList = identityService.createUserQuery().memberOfGroup("requestedUserTyp").list();
 		User selectedUser = null;
 		for(User user: userList){
 			if(user.getId().equalsIgnoreCase(requestedUserId)){
@@ -38,6 +40,7 @@ public class SachbearbeiterDelegate implements JavaDelegate {
 			LOGGER.warning("Requested User not found - no User will be set. Task needs to be claimed!");
 		}
 		
+		//TODO Name anpassen bzw. wird das noch benötigt?
 		execution.setVariable("Assignee_Calc", selectedUser.getId());
 	}
 

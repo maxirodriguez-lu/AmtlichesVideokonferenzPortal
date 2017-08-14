@@ -102,7 +102,12 @@ public class DataHandler implements JavaDelegate{
 																(long) databaseHandler.extractFieldFromPayload(id, "AMT_ID"),
 																(long) databaseHandler.extractFieldFromPayload(id, "MITARBEITER_ID"),
 																(String) databaseHandler.extractFieldFromPayload(id, "TERMIN_DATUMUNDUHRZEIT"),
-																(long) databaseHandler.extractFieldFromPayload(id, "TERMIN_GROUP_ID")
+																(String) databaseHandler.extractFieldFromPayload(id, "TERMIN_GROUP_ID"),
+																(String) databaseHandler.extractFieldFromPayload(id, "KUNDEN_ANREDE"),
+																(String) databaseHandler.extractFieldFromPayload(id, "KUNDEN_VORNAME"),
+																(String) databaseHandler.extractFieldFromPayload(id, "KUNDEN_NAME"),
+																(String) databaseHandler.extractFieldFromPayload(id, "KUNDEN_EMAIL"),
+																(String) databaseHandler.extractFieldFromPayload(id, "ANFRAGE")
 								);
 						status = STATUSENUM.OKAY;
 						break;

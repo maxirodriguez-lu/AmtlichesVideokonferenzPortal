@@ -293,16 +293,16 @@ public class Facade {
 							if(variables.containsKey(fieldName)){
 								return variables.get(fieldName);
 							}else{
-					            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%n' konnte kein Eintrag '%s' gefunden werden!", id, fieldName));
+					            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%s' konnte kein Eintrag '%s' gefunden werden!", id, fieldName));
 							}
 						}else{
-				            throw new SQLException(String.format("Illegaler Eintragstyp in den Variablen des Request-Payload des Eintrags mit ID '%n'!", id, fieldName));
+				            throw new SQLException(String.format("Illegaler Eintragstyp in den Variablen des Request-Payload des Eintrags mit ID '%s'!", id));
 						}
 					}else{
-			            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%n' konnte kein Eintrag 'variables' gefunden werden!", id, fieldName));
+			            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%s' konnte kein Eintrag 'variables' gefunden werden!", id));
 					}
 				}else{
-		            throw new SQLException(String.format("Request-Payload des Eintrags mit ID '%n' konnte nicht gelesen werden!", id));
+		            throw new SQLException(String.format("Request-Payload des Eintrags mit ID '%s' konnte nicht gelesen werden!", id));
 				}
 			}else {
 	            throw new SQLException("Datenauslesen fehlgeschlage, Daten fehlerhaft!");
@@ -311,7 +311,7 @@ public class Facade {
 		} catch (SQLException e) {
 	        throw new RuntimeException(e.getMessage());
 		} catch (ParseException e) {
-            throw new RuntimeException(String.format("Request-Payload des Eintrags mit ID '%n' ist korrupt!", id));
+            throw new RuntimeException(String.format("Request-Payload des Eintrags mit ID '%s' ist korrupt!", id));
 		} catch (IOException e) {
 	        throw new RuntimeException(e.getMessage());
 		} 
@@ -702,6 +702,9 @@ public class Facade {
 		//Hashmap aufbauen
 		HashMap<String, JSONObject> moeglicheTermine_global = new HashMap<String, JSONObject>();
 		
+		Calendar now = Calendar.getInstance();
+		now.add(Calendar.MINUTE, slotDauer);
+		
 		try{
 			//Amt holen und Öffnungszeiten auslesen
 			JSONObject oeffnungszeiten = gibAmtOeffnungzeiten(amts_id, getDayOfTheWeekFromDate(datum));
@@ -731,7 +734,7 @@ public class Facade {
 					
 					while(morgen_von.before(morgen_bis)){
 						if(!moeglicheTermine_mitarbeier.containsKey(dateFormat_dateTime.format(morgen_von.getTime()))){
-							moeglicheTermine_mitarbeier.put(dateFormat_timeOnly.format(morgen_von.getTime()), createAppointmentJSON((Calendar) morgen_von.clone(), dbResults));
+							if(morgen_von.after(now)) moeglicheTermine_mitarbeier.put(dateFormat_timeOnly.format(morgen_von.getTime()), createAppointmentJSON((Calendar) morgen_von.clone(), dbResults));
 						}
 						morgen_von.add(Calendar.MINUTE, slotDauer);
 					}
@@ -746,7 +749,7 @@ public class Facade {
 					
 					while(mittag_von.before(mittag_bis)){
 						if(!moeglicheTermine_mitarbeier.containsKey(dateFormat_dateTime.format(mittag_von.getTime()))){
-							moeglicheTermine_mitarbeier.put(dateFormat_timeOnly.format(mittag_von.getTime()), createAppointmentJSON((Calendar) mittag_von.clone(), dbResults));
+							if(morgen_von.after(now)) moeglicheTermine_mitarbeier.put(dateFormat_timeOnly.format(mittag_von.getTime()), createAppointmentJSON((Calendar) mittag_von.clone(), dbResults));
 						}
 						mittag_von.add(Calendar.MINUTE, slotDauer);
 					}
@@ -847,7 +850,12 @@ public class Facade {
 									long AMT_ID, 
 									long MITARBEITER_ID,
 									String TERMIN_DATUMUNDUHRZEIT,
-									long TERMIN_GROUP_ID) {
+									String TERMIN_GROUP_ID,
+									String KUNDEN_ANREDE,
+									String KUNDEN_VORNAME,
+									String KUNDEN_NAME,
+									String KUNDEN_EMAIL,
+									String ANFRAGE) {
 		
 		JSONObject quittung = new JSONObject();
 		try{
@@ -875,31 +883,37 @@ public class Facade {
 						boolean mitarbeiterArbeitetBeiAmt = checkMitarbeiterGegenAmt(MITARBEITER_ID, AMT_ID);
 						if(mitarbeiterArbeitetBeiAmt){
 							boolean mitarbeiterBeraetService = checkMitarbeiterGegenService(MITARBEITER_ID, SERVICE_ID);
-							if(!mitarbeiterBeraetService){
+							if(mitarbeiterBeraetService){
 								boolean anzahlTermineDerGruppeKleinerDrei = checkAnzahlTermineInGruppe(TERMIN_GROUP_ID, 2);
-								if(!anzahlTermineDerGruppeKleinerDrei){
+								if(anzahlTermineDerGruppeKleinerDrei){
+									boolean allNeededCustomerFieldsSet = checkCustomerFields(KUNDEN_ANREDE, KUNDEN_NAME, KUNDEN_EMAIL);
+									if(!allNeededCustomerFieldsSet){
+										throw new RuntimeException("Anfrage ungültig: Die Felder 'Anrede', 'Name' oder 'Email' sind nicht, oder nicht korrekt befüllt (KUNDEN_ANREDE = '" + KUNDEN_ANREDE + "', KUNDEN_NAME = '" + KUNDEN_NAME + "', KUNDEN_EMAIL = '" + KUNDEN_EMAIL + "')!\n" +
+				   				   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
+									}
+								}else{
 									throw new RuntimeException("Anfrage ungültig: Es existieren bereits 3 oder mehr Termine zu Ihrer Anfrage (TERMIN_GROUP_ID = '" + TERMIN_GROUP_ID + "')!\n" +
-			   				   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
-				}
+			   				   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
+								}
 							}else{
 								throw new RuntimeException("Anfrage ungültig: Der ausgewählte Mitarbeiter (ID = '" + MITARBEITER_ID + "') passt nicht zum ausgewählten Service (ID = '" + SERVICE_ID + "')!\n" +
-						   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+						   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
 							}
 						}else{
 							throw new RuntimeException("Anfrage ungültig: Der ausgewählte Mitarbeiter (ID = '" + MITARBEITER_ID + "') passt nicht zum ausgewählten Amt (ID = '" + AMT_ID + "')!\n" +
-					   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+					   				   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
 						}
 					}else{
 						throw new RuntimeException("Anfrage ungültig: Das ausgewählte Amt (ID = '" + AMT_ID + "') passt nicht zum ausgewählten Service (ID = '" + SERVICE_ID + "')!\n" +
-				   				   				  "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+				   				   				  "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
 					}
 				}else{
 					throw new RuntimeException("Anfrage ungültig: Das ausgewählte Amt (ID = '" + AMT_ID + "') passt nicht zur ausgewählten Amtsart (ID = '" + AMTSART_ID + "')!\n" +
-							   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+							   				   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
 				}
 			}else{
 				throw new RuntimeException("Anfrage ungültig: Der ausgewählte Service (ID = '" + SERVICE_ID + "') passt nicht zum ausgewählten Beratunggebiet (ID = '" + BERATUNGSGEBIET_ID + "')!\n" +
-										   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>')");
+										   "Bitte wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>')");
 			}
 			
 			
@@ -934,11 +948,11 @@ public class Facade {
 					quittung.put("TERMIN_SALT", (String) termin.get("SALT"));
 				}else{
 					throw new RuntimeException("Der Terminwunsch konnte nicht korrekt verarbeitet werden. Bitte versuchen Sie es erneut.\n" +
-											   "Wenn der Fehler wiederholt auftritt, wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>').");
+											   "Wenn der Fehler wiederholt auftritt, wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>').");
 				}
 			}else{
 				throw new RuntimeException("Der Terminwunsch konnte nicht korrekt verarbeitet werden: Der Termin konnte nicht angelegt werden. Bitte versuchen Sie es erneut.\n" +
-						   				   "Wenn der Fehler wiederholt auftritt, wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereInformationen.html'>Weitere Information</a>').");
+						   				   "Wenn der Fehler wiederholt auftritt, wenden Sie sich bitte an den Support (siehe Seite '<a href='misc/weitereinformationen.html'>Weitere Information</a>').");
 			}
 		}catch(Exception e){
 			quittung.put("STATUS", "ERROR");
@@ -951,11 +965,17 @@ public class Facade {
 		return result;
 	}
 
-	private boolean checkAnzahlTermineInGruppe(long tERMIN_GROUP_ID, int i) {
+	private boolean checkCustomerFields(String KUNDEN_ANREDE, String KUNDEN_NAME, String KUNDEN_EMAIL) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
+	private boolean checkAnzahlTermineInGruppe(String TERMIN_GROUP_ID, int i) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
 	private JSONObject createTermin(long BERATUNGSGEBIET_ID, 
 									long SERVICE_ID, 
 									long AMTSART_ID, 
@@ -963,7 +983,8 @@ public class Facade {
 									long MITARBEITER_ID, 
 									String TERMIN_DATUMUNDUHRZEIT) {
 		JSONObject result = new JSONObject();
-		
+		result.put("ID", new Long("126316273").longValue());
+		result.put("SALT", "hjahsbdhjasd-ajsbdjbas-basjhdasbd");
 		// TODO Add Logic here
 		
 		return result;
@@ -971,32 +992,32 @@ public class Facade {
 
 	private boolean checkTerminGegenMitarbeiterAmtDatum(long TERMIN_ID, long MITARBEITER_ID, long AMT_ID, String tERMIN_DATUMUNDUHRZEIT) {
 		// TODO Add Logic here
-		return false;
+		return true;
 	}
 
 	private boolean checkMitarbeiterGegenService(long MITARBEITER_ID, long SERVICE_ID) {
 		// TODO Add Logic here
-		return false;
+		return true;
 	}
 
 	private boolean checkMitarbeiterGegenAmt(long MITARBEITER_ID, long AMT_ID) {
 		// TODO Add Logic here
-		return false;
+		return true;
 	}
 
 	private boolean checkAmtGegenService(long AMT_ID, long SERVICE_ID) {
 		// TODO Add Logic here
-		return false;
+		return true;
 	}
 
 	private boolean checkAmtGegenAmtsart(long AMT_ID, long AMTSART_ID) {
 		// TODO Add Logic here
-		return false;
+		return true;
 	}
 
 	private boolean checkServiceGegenBeratungsgebiet(long SERVICE_ID, long BERATUNGSGEBIET_ID) {
 		// TODO Add Logic here
-		return false;
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1042,7 +1063,7 @@ public class Facade {
 		
 		//Mitarbeiterdaten auslesen und übernehmen
 		JSONObject mitarbeiter2 = getMitarbeiterDaten(TERMIN_2_MA_ID);
-		termin1.put("MITARBEITER", mitarbeiter2);
+		termin2.put("MITARBEITER", mitarbeiter2);
 
 		zusammenfassung.put("TERMIN_2", termin2);
 		
@@ -1070,8 +1091,8 @@ public class Facade {
 	}
 
 	@SuppressWarnings("unchecked")
-	private JSONObject getMitarbeiterDaten(long TERMIN_1_MA_ID) {		
-		String selectSQL = "SELECT ID, TYP, ANREDE, NAME, VORNAME, EMAIL, TELEFON, PROFILBILD FROM PUBLIC.BERATER WHERE ID = " + TERMIN_1_MA_ID + ";";
+	private JSONObject getMitarbeiterDaten(long MA_ID) {		
+		String selectSQL = "SELECT ID, TYP, ANREDE, NAME, VORNAME, EMAIL, TELEFON, PROFILBILD FROM PUBLIC.BERATER WHERE ID = " + MA_ID + ";";
 		
 		try(
 			Connection conn = getFachlicheDatenbank();	
@@ -1089,6 +1110,8 @@ public class Facade {
 				mitarbeiter.put("EMAIL", dbResults.getString(6));
 				mitarbeiter.put("TELEFON", dbResults.getString(7));
 				mitarbeiter.put("PROFILBILD", dbResults.getString(8));
+			}else{
+				throw new RuntimeException(String.format("Es konnte kein Mitarbeiter mit der ID '%s' in der Datenbank gefunden werden!", MA_ID));
 			}
 			return mitarbeiter;
 		} catch (Exception e) {
@@ -1098,7 +1121,7 @@ public class Facade {
 
 	@SuppressWarnings("unchecked")
 	private JSONObject getAmtDaten(long AMTS_ID) {
-		String selectSQL_Services = "SELECT ID, NAME, AMTSART_ID, ADRESSE, PLZ, ORT, MAIL, TELEFON, URL, PLZ_GEBIET_VON, PLZ_GEBIET_BIS FROM PUBLIC.AEMTER WHERE AMTSART_ID = " + AMTS_ID + ";";
+		String selectSQL_Services = "SELECT ID, NAME, AMTSART_ID, ADRESSE, PLZ, ORT, MAIL, TELEFON, URL, PLZ_GEBIET_VON, PLZ_GEBIET_BIS FROM PUBLIC.AEMTER WHERE ID = " + AMTS_ID + ";";
 		
 		try(
 			Connection conn = getFachlicheDatenbank();	
@@ -1120,7 +1143,9 @@ public class Facade {
 				amt.put("PLZ_GEBIET_VON", dbResults.getLong(10));
 				amt.put("PLZ_GEBIET_BIS", dbResults.getLong(11));
 				
-				amt.put("LOGO", gibAmtsartZuAmt(AMTS_ID).get("LOGO"));
+				amt.put("LOGO", gibAmtsartZuAmt(dbResults.getLong(3)).get("LOGO"));
+			}else{
+				throw new RuntimeException(String.format("Es konnte kein Amt mit der ID '%s' in der Datenbank gefunden werden!", AMTS_ID));
 			}
 			return amt;
 		} catch (Exception e) {

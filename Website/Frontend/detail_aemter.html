@@ -196,7 +196,7 @@
   					<h3>Fehler aufgereten</h3>
   					<p>Bei der Verarbeitung ist entweder ein Fehler aufgereten oder es sind gar keine Termine in den nächsten 3 Wochen beim ausgewählten Amt mehr frei.</p>
   					<p></p>
-  					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="/misc/weitereInformationen.html">'Weitere Informationen'</a>).</p>
+  					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="misc/weitereinformationen.html">'Weitere Informationen'</a>).</p>
   				</td>
   				<td style="width:10%"></td>
   			</tr>
@@ -212,7 +212,7 @@
   					<h3>Fehler aufgereten</h3>
   					<p>Bei der Verarbeitung ist ein Fehler aufgereten: Die Terminvorschau konnte nicht erzeugt werden!</p>
   					<p></p>
-  					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="/misc/weitereInformationen.html">'Weitere Informationen'</a>).</p>
+  					<p>Versuchen Sie es später entweder erneut oder wenden Sie sich an den Support (siehe Seite <a href="misc/weitereinformationen.html">'Weitere Informationen'</a>).</p>
   				</td>
   				<td style="width:10%"></td>
   			</tr>
@@ -247,130 +247,98 @@
   <div id="appointmentSummary" class="modal-wrapper alwaysShowScrollbar" style="display:none">
     <div class="summary-wrapper">
       <div class="modal-container w-container">
-        <div class="section-title-group">
-          <div class="center section-subheading subheading-terminwahl">Geben Sie Hier ihren Wunschtermin an:</div>
-          <h1>Terminzusammenfassung</h1>
+      	<div id="summaryContentContainer" >
+	        <div class="section-title-group">
+	          <div class="center section-subheading subheading-terminwahl">Geben Sie Hier ihren Wunschtermin an:</div>
+	          <h1>Terminzusammenfassung</h1>
+	        </div>
+	        <p>Die Zusammenfassung ihres Termins. Bitte prüfen Sie, ob die angezeigten Angaben korrekt sind. Falls ja füllen Sie bitte das Formular aus und senden Sie die Anfrage ab ...</p>
+	        <div id="SummaryContainer_Amt" class="appointmentblock">
+	          <h2 class="summary-header">Zuständiges Amt</h2>
+	          	<!-- Programmatische Befüllung: Amt_Summary -->
+	        </div>
+	        <div>
+	          <div id="SummaryHeader_Termin1" class="appointmentblock">
+	            <h2>Wunschtermin</h2>
+	            <h3></h3>
+	            <div data-ix="fade-in-bottom-page-loads">
+	              <div class="appointmentconnectedemployee appointmentconnectedemployeesummary">
+	                <div class="w-dyn-list">
+	                  <div id="SummaryContainer_Termin1" class="w-dyn-items">
+	                    <h6>Ihr Gespräch mit:</h6>
+	                    <!-- Programmatisch Befüllung: Mitarbeiter -->
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	        <div>
+	          <div id="SummaryHeader_Termin2" class="appointmentblock">
+	            <h2>Alternativtermin 1</h2>
+	            <h3></h3>
+	            <div data-ix="fade-in-bottom-page-loads">
+	              <div class="appointmentconnectedemployee appointmentconnectedemployeesummary">
+	                <div class="w-dyn-list">
+	                  <div id="SummaryContainer_Termin2" class="w-dyn-items">
+	                    <h6>Ihr Gespräch mit:</h6>
+	                    <!-- Programmatisch Befüllung: Mitarbeiter -->
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	        <div>
+	          <div id="SummaryHeader_Termin3" class="appointmentblock">
+	            <h2>Alternativtermin 2</h2>
+	            <h3></h3>
+	            <div data-ix="fade-in-bottom-page-loads">
+	              <div class="appointmentconnectedemployee appointmentconnectedemployeesummary">
+	                <div class="w-dyn-list">
+	                  <div id="SummaryContainer_Termin3" class="w-dyn-items">
+	                    <h6>Ihr Gespräch mit:</h6>
+	                    <!-- Programmatisch Befüllung: Mitarbeiter -->
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	        <!-- Inputdaten -->
+	        <div class="w-form">
+	        	<div data-name="Email Form" id="email-form">
+		            <h2>Ihre Daten</h2>
+		            <select id="customer-data-anrede" class="w-select" data-name="Anrede" id="Anrede" name="Anrede" required="required">
+		            	<option value="Herr">Herr</option>
+						<option value="Frau">Frau</option>
+					</select>
+					<input id="customer-data-vorname" class="w-input" data-name="Vorname" id="Vorname" maxlength="256" name="Vorname" placeholder="Vorname …" required="required" type="text">
+					<input id="customer-data-name" class="w-input" data-name="Nachname" id="Nachname" maxlength="256" name="Nachname" placeholder="Nachname …" required="required" type="text">
+					<input id="customer-data-email" class="w-input" data-name="Email" id="email" maxlength="256" name="email" placeholder="Email ...." required="required" type="email">
+					<textarea id="anfrage" class="w-input" id="field" maxlength="2000" name="field" placeholder="Ihre Frage ..." required="required"></textarea>
+				</div>
+	        </div>
+	    </div>
+        <!-- Inputdaten -->
+		<div id="appointment-generation-successful" class="success-alert" style="display:none">
+			<div class="success-box">
+				<h5 class="success-heading">Anfrage versendet</h5>
+				<p class="success-text">Ihre Anfrage wurde erfolgreich versendet. Sie erhalten zeitnah eine Zusammenfassung des Termins sowie eine Bestätigung des Termins, sobald der zugewiesene Mitarbeiter ihn angenommen hat.</p>
+			</div>
+		</div>
+		<div id="appointment-generation-failed" class="fail-alert" style="display:none">
+			<div class="fail-box">
+				<h5 class="fail-heading">Fehler aufgetreten!</h5>
+				<p class="fail-text">Bei der Verarbeitung ihrer Anfrage ist ein Fehler aufgetreten:</p>
+				<p id="errorMsgPlaceholder" class="fail-text">Bei der Verarbeitung ihrer Anfrage ist ein Fehler aufgetreten:</p>
+			</div>
+		</div>
+		
+        <div class="buttoncontainer" data-ix="fade-in-bottom-page-loads">
+        	<a id="submit-summary-button" class="button buttonwide" >Termin-Anfrage Senden</a>
+        	<a id="close-summary-button" class="all-caps hollow-button modalclosebutton" href="#">Schliesen</a>
         </div>
-        <p>Die Zusammenfassung ihres Termins. Bitte prüfen Sie, ob die angezeigten Angaben korrekt sind. Falls ja füllen Sie bitte das Formular aus und senden Sie die Anfrage ab ...</p>
-        <div class="appointmentblock">
-          <h2 class="summary-header">Zuständiges Amt</h2>
-          <div class="w-row">
-            <div class="w-col w-col-3"><img class="summary-logo" sizes="(max-width: 479px) 100vw, (max-width: 767px) 67vw, 16vw"></div>
-            <div class="w-col w-col-9">
-              <div class="break summary text"></div>
-              <div class="summary text"></div>
-              <div class="break summary text"></div>
-              <div class="summary text"></div>
-              <div class="summary text"></div>
-              <div class="summary text"></div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="appointmentblock">
-            <h2>Wunschtermin</h2>
-            <h3>Freitag, 12.10.2016, 9:00 - 9:30 Uhr</h3>
-            <div data-ix="fade-in-bottom-page-loads">
-              <div class="appointmentconnectedemployee appointmentconnectedemployeesummary">
-                <div class="w-dyn-list">
-                  <div class="w-dyn-items">
-                    <div class="w-dyn-item">
-                      <div class="white-box whiteboxemployee">
-                        <h6>Ihr Gespräch mit:</h6>
-                        <div class="employeename summary">
-                          <h3></h3>
-                          <h3></h3>
-                          <h3></h3>
-                        </div>
-                        <div class="employeetext summary"></div>
-                        <div class="employeetextphone summary"></div>
-                        <div class="employeetextanwesenheit summary"></div>
-                        <div class="employeetextplz summary"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="w-dyn-empty">
-                    <div class="noemployeefound">Keine freien Mitarbeiter zum ausgewählten Termin gefunden</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="appointmentblock">
-            <h2>Alternativtermin 1</h2>
-            <h3>Montag, 15.10.2016, 9:00 - 9:30 Uhr</h3>
-            <div data-ix="fade-in-bottom-page-loads">
-              <div class="appointmentconnectedemployee appointmentconnectedemployeesummary">
-                <div class="w-dyn-list">
-                  <div class="w-dyn-items">
-                    <div class="w-dyn-item">
-                      <div class="white-box whiteboxemployee">
-                        <h6>Ihr Gespräch mit:</h6>
-                        <div class="employeename summary">
-                          <h3></h3>
-                          <h3></h3>
-                          <h3></h3>
-                        </div>
-                        <div class="employeetext summary"></div>
-                        <div class="employeetextphone summary"></div>
-                        <div class="employeetextanwesenheit summary"></div>
-                        <div class="employeetextplz summary"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="w-dyn-empty">
-                    <div class="noemployeefound">Keine freien Mitarbeiter zum ausgewählten Termin gefunden</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="appointmentblock">
-            <h2>Alternativtermin 2</h2>
-            <h3>Dienstag, 16.10.2016, 9:00 - 9:30 Uhr</h3>
-            <div data-ix="fade-in-bottom-page-loads">
-              <div class="appointmentconnectedemployee appointmentconnectedemployeesummary">
-                <div class="w-dyn-list">
-                  <div class="w-dyn-items">
-                    <div class="w-dyn-item">
-                      <div class="white-box whiteboxemployee">
-                        <h6>Ihr Gespräch mit:</h6>
-                        <div class="employeename summary">
-                          <h5></h5>
-                          <h5></h5>
-                          <h5></h5>
-                        </div>
-                        <div class="employeetext summary"></div>
-                        <div class="employeetextphone summary"></div>
-                        <div class="employeetextanwesenheit summary"></div>
-                        <div class="employeetextplz summary"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="w-dyn-empty">
-                    <div class="noemployeefound">Keine freien Mitarbeiter zum ausgewählten Termin gefunden</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="w-form">
-          <form data-name="Email Form" id="email-form" name="email-form">
-            <h2>Ihre Daten</h2><select class="w-select" data-name="Anrede" id="Anrede" name="Anrede" required="required"><option value="Herr">Herr</option>
-<option value="Frau">Frau</option></select><input class="w-input" data-name="Vorname" id="Vorname" maxlength="256" name="Vorname" placeholder="Vorname …" required="required" type="text"><input class="w-input" data-name="Nachname" id="Nachname" maxlength="256" name="Nachname" placeholder="Nachname …" required="required" type="text"><input class="w-input" data-name="Email" id="email" maxlength="256" name="email" placeholder="Email ...." required="required" type="email"><textarea class="w-input" id="field" maxlength="5000" name="field" placeholder="Ihre Frage ..." required="required"></textarea></form>
-          <div class="w-form-done">
-            <div>Thank you! Your submission has been received!</div>
-          </div>
-          <div class="w-form-fail">
-            <div>Oops! Something went wrong while submitting the form</div>
-          </div>
-        </div>
-        <div class="buttoncontainer" data-ix="fade-in-bottom-page-loads"><a class="button buttonwide" data-ix="modal-close" href="index.html">Termin-Anfrage Senden</a><a class="all-caps hollow-button modalclosebutton" data-ix="modal-close" href="#">Schliessen</a></div>
       </div>
     </div>
   </div>
@@ -386,6 +354,7 @@
 	var host = "localhost";
 	var moeglicheTermine;
 	var moeglicheTermin_datumsliste;
+	var terminZusammenfassung;
 	
 	var picker1;
 	var picker2;
@@ -425,16 +394,27 @@
 		.done(function( data ) {
   			moeglicheTermine = data.RESULT;
   			
-  			moeglicheTermin_datumsliste = moeglicheTermine.reduce(function(keys, element){ 
-  			    for (key in element) {
-  			       keys.push(moment(key, "DD.MM.YYYY").format("DD.MM.YYYY"));
-  			    } 
-  			    return keys; 
-  			},[]);
+  			var dataIsAvailable = false;
   			
-  			createPicker1();
-  			createPicker2();
-  			createPicker3();
+  			for(var counter in moeglicheTermine){
+  				var dateKey = Object.keys(moeglicheTermine[counter])[0];
+				if(Object.keys(moeglicheTermine[counter][dateKey]).length > 0) dataIsAvailable = true;
+    		}
+  			
+  			if(dataIsAvailable){
+  	  			moeglicheTermin_datumsliste = moeglicheTermine.reduce(function(keys, element){ 
+  	  			    for (key in element) {
+  	  			       keys.push(moment(key, "DD.MM.YYYY").format("DD.MM.YYYY"));
+  	  			    } 
+  	  			    return keys; 
+  	  			},[]);
+  	  			
+  	  			createPicker1();
+  	  			createPicker2();
+  	  			createPicker3();
+  			}else{
+  				errOcc = true;
+  			}
 		})
 		.always(function() {
     		if(errOcc){
@@ -447,10 +427,129 @@
 	  	});
 	});
 	
-	$('#SummaryDisplayButton').click(function(){
+	$( '#close-summary-button' ).click(function(){
+		$( "#appointmentSummary" ).hide( "fast" );
+	});
+	
+	$( '#submit-summary-button' ).click(function(){
+		var urlParams = getUrlParams();
+		var uuid = uuidv4();
+		var errOcc = false;
+		var urlParams = getUrlParams();
+
+		$( "#appointment-generation-failed" ).hide('fast');
+		$( "#appointment-generation-successful" ).hide( "fast" );
+		
+		var checkData = true;
+		var illegalDataMsg = "";
+
+		if($( '#customer-data-anrede' ).val().length <= 0){
+			illegalDataMsg = "Das Feld 'Anrede' muss befüllt werden!"; 
+			checkData = false;
+		}
+		if($( '#customer-data-name' ).val().length <= 0){
+			illegalDataMsg = (illegalDataMsg.length > 0 ? illegalDataMsg + "\n" : "") + "Das Feld 'Name' muss befüllt werden!'"; 
+			checkData = false;
+		}
+		if($( '#customer-data-email' ).val().length <= 0 || !validateEmail($( '#customer-data-email' ).val())){
+			illegalDataMsg = (illegalDataMsg.length > 0 ? illegalDataMsg + "\n" : "") +"Das Feld 'Email' muss mit einer gültigen Emailadresse befüllt werden!"; 
+			checkData = false;
+		}
+		
+		if(!checkData){
+			$( '#errorMsgPlaceholder' ).empty();
+			
+			$( '#errorMsgPlaceholder' ).append(illegalDataMsg);
+			$( "#appointment-generation-failed" ).show('fast');
+			
+			location.hash = "appointment-generation-failed";
+			return;
+		}
+		
+		
+		for(var i = 1; i <= 3; i++){
+			$.ajax({
+		    	headers: { 
+		    	    "Accept": "application/json",
+		        	"Content-Type": "application/json"
+		    	},
+			  	url: "http://" + host + ":8080/requestHandler/rest/request/setData/TerminAnlegen/?user=AVP_Frontend&userAuth=test",
+		    	type: "POST",
+		    	dataType: "json",
+		    	async: false,
+		    	data: "{" + 
+							"\"variables\": {" +
+									"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + ", " +
+									"\"SERVICE_ID\":" + urlParams.SERVICE + ", " +
+									"\"AMTSART_ID\":" + urlParams.AMTSART_ID + ", " +
+									"\"AMT_ID\":" + urlParams.ID + ", " +
+									"\"MITARBEITER_ID\":" + terminZusammenfassung["TERMIN_" + i].MITARBEITER.ID + ", " +
+									"\"TERMIN_DATUMUNDUHRZEIT\":\"" + terminZusammenfassung.TERMIN_1.DATUM + " " + terminZusammenfassung.TERMIN_1.SLOT + "\", " +
+									"\"TERMIN_GROUP_ID\":\"" + uuid + "\", " +
+									"\"KUNDEN_ANREDE\":\"" + $( '#customer-data-anrede' ).val() + "\", " +
+									"\"KUNDEN_VORNAME\":\"" + $( '#customer-data-vorname' ).val() + "\", " +
+									"\"KUNDEN_NAME\":\"" + $( '#customer-data-name' ).val() + "\", " +
+									"\"KUNDEN_EMAIL\":\"" + $( '#customer-data-email' ).val() +"\", " +
+									"\"ANFRAGE\":\"" + $( '#anfrage' ).val() + "\"" +
+								"}" + 
+						"}"
+			})
+			.fail(function(data){
+				errOcc = true;
+				
+		  		if ( console && console.log ) {
+		  	  		console.log( data );
+		  	  	}
+			})
+			.done(function( data ) {
+				errOcc = false;
+					
+	  			var result = data.RESULT[0];
+	  			
+	  			if(result){
+	  				if(result.STATUS == "OKAY"){
+	  					var id = result.TERMIN_ID;
+	  					var salt = result.TERMIN_SALT;
+	  					
+	  					//TODO Appointmentrequest abschießen
+	  					
+	  					console.log(id + ": " + salt);
+	  				}else if(result.STATUS == "ERROR"){
+	  					var msg = result.ERRORMESSAGE;
+
+	  					$( '#errorMsgPlaceholder' ).empty();
+	  					$( '#errorMsgPlaceholder' ).append(msg);
+	  					
+	  					errOcc = true;
+	  				}
+	  				
+	  			}
+			})
+			.always(function() {
+  	  			$( "#summaryContentContainer" ).hide('fast');
+  	  			$( "#submit-summary-button" ).hide('fast');
+  	  			
+	    		if(errOcc){
+	  	  			$( "#appointment-generation-failed" ).show('fast');
+	    		}else{
+	  	  			$( "#appointment-generation-successful" ).show( "fast" );
+				}
+		  	});
+			if(errOcc) break;
+		}
+	});
+	
+	$( '#SummaryDisplayButton' ).click(function(){
 		var errOcc = false;
 		
 		var urlParams = getUrlParams();
+		
+
+		$( "#summaryContentContainer" ).show('fast');
+		$( "#submit-summary-button" ).show('fast');
+
+		$( "#appointment-generation-failed" ).hide('fast');
+  		$( "#appointment-generation-successful" ).hide( "fast" );
 		
 		$.ajax({
 	    	headers: { 
@@ -462,15 +561,15 @@
 	    	dataType: "json",
 	    	data: "{" + 
 						"\"variables\": {" +
-								"\"AMTS_ID\":" + urlParams.ID +
-								"\"TERMIN_1_DATUM\":" + $( "#appointment1Selected" ).text().substring(0, 10) +
-								"\"TERMIN_1_SLOT\":" + $( "#appointment1Selected" ).text().substring(12, 20) +
-								"\"TERMIN_1_MA_ID\":" +$( "#appointmentconnectedemployee1" ).find("#EmployeeID").text() +
-								"\"TERMIN_2_DATUM\":" + $( "#appointment2Selected" ).text().substring(0, 10) +
-								"\"TERMIN_2_SLOT\":" + $( "#appointment2Selected" ).text().substring(12, 20) +
-								"\"TERMIN_2_MA_ID\":" + $( "#appointmentconnectedemployee2" ).find("#EmployeeID").text() +
-								"\"TERMIN_3_DATUM\":" + $( "#appointment3Selected" ).text().substring(0, 10) +
-								"\"TERMIN_3_SLOT\":" + $( "#appointment3Selected" ).text().substring(12, 20) +
+								"\"AMTS_ID\":" + urlParams.ID + ", " +
+								"\"TERMIN_1_DATUM\":\"" + $( "#appointment1Selected" ).text().substring(0, 10) + "\", " +
+								"\"TERMIN_1_SLOT\":\"" + $( "#appointment1Selected" ).text().substring(12, 20) + "\", " +
+								"\"TERMIN_1_MA_ID\":" +$( "#appointmentconnectedemployee1" ).find("#EmployeeID").text() + ", " +
+								"\"TERMIN_2_DATUM\":\"" + $( "#appointment2Selected" ).text().substring(0, 10) + "\", " +
+								"\"TERMIN_2_SLOT\":\"" + $( "#appointment2Selected" ).text().substring(12, 20) + "\", " +
+								"\"TERMIN_2_MA_ID\":" + $( "#appointmentconnectedemployee2" ).find("#EmployeeID").text() + ", " +
+								"\"TERMIN_3_DATUM\":\"" + $( "#appointment3Selected" ).text().substring(0, 10) + "\", " +
+								"\"TERMIN_3_SLOT\":\"" + $( "#appointment3Selected" ).text().substring(12, 20) + "\", " +
 								"\"TERMIN_3_MA_ID\":" + $( "#appointmentconnectedemployee3" ).find("#EmployeeID").text() +
 							"}" + 
 					"}"
@@ -483,8 +582,95 @@
 	  	  	}
 		})
 		.done(function( data ) {
-  			terminZusammenfassung = data.RESULT;
-  			console.log(terminZusammenfassung);
+			errOcc = false;
+				
+  			terminZusammenfassung = data.RESULT[0];
+  			
+  			if(terminZusammenfassung.AMT){
+  				if(terminZusammenfassung.AMT.NAME && terminZusammenfassung.AMT.ADRESSE &&
+  						terminZusammenfassung.AMT.PLZ && terminZusammenfassung.AMT.ORT &&
+  						terminZusammenfassung.AMT.LOGO && terminZusammenfassung.AMT.URL &&
+  						terminZusammenfassung.AMT.ID){
+  					
+  					$( "#SummaryContainer_Amt" ).empty();
+	  	  			addTemplateAmt($( "#SummaryContainer_Amt" ), 
+  	  						   terminZusammenfassung.AMT.NAME, 
+  	  						   terminZusammenfassung.AMT.ADRESSE, 
+  	  						   terminZusammenfassung.AMT.PLZ,
+  	  						   terminZusammenfassung.AMT.ORT, 
+  	  						   terminZusammenfassung.AMT.URL, 
+  	  						   terminZusammenfassung.AMT.LOGO,
+  							   terminZusammenfassung.AMT.ID)
+  				
+	  				if(terminZusammenfassung.TERMIN_1 && terminZusammenfassung.TERMIN_1.MITARBEITER){
+	  					if(terminZusammenfassung.TERMIN_1.MITARBEITER.ID && 
+	  						terminZusammenfassung.TERMIN_1.MITARBEITER.VORNAME && 
+							terminZusammenfassung.TERMIN_1.MITARBEITER.NAME &&
+							terminZusammenfassung.TERMIN_1.MITARBEITER.TELEFON && 
+							terminZusammenfassung.TERMIN_1.MITARBEITER.EMAIL && 
+							terminZusammenfassung.TERMIN_1.MITARBEITER.TYP){
+	  						
+	  						$( "#SummaryContainer_Termin1" ).empty();
+	  						addTemplateMA($( "#SummaryContainer_Termin1" ), 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.ID, 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.PROFILBILD.length == 0 ? "images/Profilbilder/Placeholder.PNG" : terminZusammenfassung.TERMIN_1.MITARBEITER.PROFILBILD, 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.VORNAME, 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.NAME, 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.TELEFON, 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.EMAIL, 
+	  										terminZusammenfassung.TERMIN_1.MITARBEITER.TYP);
+	  										
+	  						$( "#SummaryHeader_Termin1" ).find( "h3" ).text(terminZusammenfassung.TERMIN_1.DATUM + " " + terminZusammenfassung.TERMIN_1.SLOT);
+	  						
+	  						if(terminZusammenfassung.TERMIN_2 && terminZusammenfassung.TERMIN_2.MITARBEITER){
+	  		  					if(terminZusammenfassung.TERMIN_2.MITARBEITER.ID && 
+	  		  						terminZusammenfassung.TERMIN_2.MITARBEITER.VORNAME && 
+	  								terminZusammenfassung.TERMIN_2.MITARBEITER.NAME &&
+	  								terminZusammenfassung.TERMIN_2.MITARBEITER.TELEFON && 
+	  								terminZusammenfassung.TERMIN_2.MITARBEITER.EMAIL && 
+	  								terminZusammenfassung.TERMIN_2.MITARBEITER.TYP	){
+
+	  		  						$( "#SummaryContainer_Termin2" ).empty();
+	  		  						addTemplateMA($( "#SummaryContainer_Termin2" ), 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.ID, 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.PROFILBILD.length == 0 ? "images/Profilbilder/Placeholder.PNG" : terminZusammenfassung.TERMIN_2.MITARBEITER.PROFILBILD, 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.VORNAME, 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.NAME, 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.TELEFON, 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.EMAIL, 
+	  		  										terminZusammenfassung.TERMIN_2.MITARBEITER.TYP);
+	  		  						
+	  		  						$( "#SummaryHeader_Termin2" ).find( "h3" ).text(terminZusammenfassung.TERMIN_2.DATUM + " " + terminZusammenfassung.TERMIN_2.SLOT);
+	  		  						
+		  		  					if(terminZusammenfassung.TERMIN_3 && terminZusammenfassung.TERMIN_3.MITARBEITER){
+		  			  					if(terminZusammenfassung.TERMIN_3.MITARBEITER.ID && 
+		  			  						terminZusammenfassung.TERMIN_3.MITARBEITER.VORNAME && 
+		  									terminZusammenfassung.TERMIN_3.MITARBEITER.NAME &&
+		  									terminZusammenfassung.TERMIN_3.MITARBEITER.TELEFON && 
+		  									terminZusammenfassung.TERMIN_3.MITARBEITER.EMAIL && 
+		  									terminZusammenfassung.TERMIN_3.MITARBEITER.TYP	){
+
+			  		  						$( "#SummaryContainer_Termin3" ).empty();
+		  			  						addTemplateMA($( "#SummaryContainer_Termin3" ), 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.ID, 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.PROFILBILD.length == 0 ? "images/Profilbilder/Placeholder.PNG" : terminZusammenfassung.TERMIN_3.MITARBEITER.PROFILBILD, 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.VORNAME, 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.NAME, 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.TELEFON, 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.EMAIL, 
+		  			  										terminZusammenfassung.TERMIN_3.MITARBEITER.TYP);
+
+		  			  						$( "#SummaryHeader_Termin3" ).find( "h3" ).text(terminZusammenfassung.TERMIN_3.DATUM + " " + terminZusammenfassung.TERMIN_3.SLOT);
+		  			  						
+		  			  						errOcc = false;
+		  			  					}
+		  			  				}
+	  		  					}
+	  		  				}
+	  					}
+	  				}
+  				}
+  			}
 		})
 		.always(function() {
     		if(errOcc){
@@ -721,7 +907,17 @@
     	inline: true
 	   });
 	}
-  	
+	
+	function validateEmail(email) {
+	    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	    return re.test(email);
+	}
+	
+	function uuidv4() {
+	  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+	    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+	  )
+	}
   	
   	function addTemplate(node, datum, datenr, slotnr, timefrom, timeto,
 			   ma_id, ma_image, ma_vorname, ma_nachname, ma_telefon, ma_mail, ma_position){
@@ -760,6 +956,21 @@
 		 	filledInTemplate = filledInTemplate.replace("%TELEFON%", telefon);
 		 	filledInTemplate = filledInTemplate.replace("%MAIL%", mail);
 		 	filledInTemplate = filledInTemplate.replace("%POSITION%", position);
+			
+		 	node.append(filledInTemplate);  
+		});
+	}
+	
+	function addTemplateAmt(node, name, adresse, plz, ort, url, image, id){
+		jQuery.get('Templates/HTML-Snippets/Amt_Summary.html', function(template) {
+			   
+			var filledInTemplate = template.replace("%NAME%", name);
+			filledInTemplate = filledInTemplate.replace("%ID%", id);
+		 	filledInTemplate = filledInTemplate.replace("%ADRESSE%", adresse);
+		 	filledInTemplate = filledInTemplate.replace("%PLZ%", plz);
+		 	filledInTemplate = filledInTemplate.replace("%ORT%", ort);
+		 	filledInTemplate = filledInTemplate.replace("%URL%", url);
+		 	filledInTemplate = filledInTemplate.replace("%IMAGE%", image);
 			
 		 	node.append(filledInTemplate);  
 		});

@@ -70,11 +70,11 @@ public class DataHandler {
 			
 			//Ergebnisse aus der fachlichen Datenbank auslesen
 			if (loggedResponse != null && loggedResponse.getStatus() != null && loggedResponse.getStatus().equals(STATUSENUM.OKAY)){
-				resp = Response.status(200).entity(loggedResponse.getPayLoad()).build();
+				resp = Response.status(200).entity(loggedResponse.getPayLoad().toJSONString()).build();
 			}else if(loggedResponse != null && loggedResponse.getStatus() != null && loggedResponse.getStatus().equals(STATUSENUM.NA)){
 				resp = Response.status(418).entity("Funktion noch nicht vollständig implementiert'!").build();
 			}else{
-				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request'!").build();
+				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request': \n" + loggedResponse.getPayLoad().toJSONString()).build();
 			}
 		}catch(Exception e){
 			resp = Response.status(404).entity(e.getMessage()).build();
@@ -119,7 +119,7 @@ public class DataHandler {
 				resp = Response.status(200).entity(loggedResponse.getPayLoad().toJSONString()).build();
 			}
 			else{
-				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request'!").build();
+				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'data-request': \n" + loggedResponse.getPayLoad().toJSONString()).build();
 			}
 		}catch(Exception e){
 			resp = Response.status(404).entity(e.getMessage()).build();
