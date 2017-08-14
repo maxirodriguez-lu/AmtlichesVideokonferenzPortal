@@ -7,7 +7,8 @@ public enum REQUESTTYPEENUM {
 	INFORMATIONEINZELDATEN("InformationEinzeldaten"),
 	MOEGLICHETERMINE("MoeglicheTermine"),
 	TERMINANLEGEN("TerminAnlegen"),
-	BERATER ("Berater");
+	BERATER ("Berater"),
+	TERMINZUSAMMENFASSUNG("TerminZusammenfassung");
 	
 	private String text;
 	

@@ -399,18 +399,6 @@
 		
 		var urlParams = getUrlParams();
 		
-		console.log( $( "#appointment1Selected" ).text());
-		console.log( $( "#appointmentconnectedemployee1" ).find("#EmployeeID").text() );
-		
-
-		console.log( $( "#appointment2Selected" ).text());
-		console.log( $( "#appointmentconnectedemployee2" ).find("#EmployeeID").text() );
-		
-		
-		console.log( $( "#appointment2Selected" ).text());
-		console.log( $( "#appointmentconnectedemployee3" ).find("#EmployeeID").text() );
-		
-		
 		$.ajax({
 	    	headers: { 
 	    	    "Accept": "application/json",
@@ -420,19 +408,12 @@
 	    	type: "POST",
 	    	dataType: "json",
 	    	data: "{" + 
-	    			"\"variables\": {" +
-	    								"\"AMTS_ID\":" + urlParams.ID +
-	    								"\"TERMIN_1_DATUM\":" + urlParams.ID +
-	    								"\"TERMIN_1_SLOT\":" + urlParams.ID +
-	    								"\"TERMIN_1_MA_ID\":" + urlParams.ID +
-	    								"\"TERMIN_2_DATUM\":" + urlParams.ID +
-	    								"\"TERMIN_2_SLOT\":" + urlParams.ID +
-	    								"\"TERMIN_2_MA_ID\":" + urlParams.ID +
-	    								"\"TERMIN_3_DATUM\":" + urlParams.ID +
-	    								"\"TERMIN_3_SLOT\":" + urlParams.ID +
-	    								"\"TERMIN_3_MA_ID\":" + urlParams.ID +
-	    							"}" + 
-	    		   "}"
+						"\"variables\": {" + 
+							"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + "," + 
+							"\"SERVICE_ID\":" + urlParams.SERVICE + 
+							"\"AMTS_ID\":" + urlParams.ID +
+						"}" + 
+					"}"
 		})
 		.fail(function(data){
 			errOcc = true;
@@ -480,35 +461,30 @@
 	    	type: "POST",
 	    	dataType: "json",
 	    	data: "{" + 
-	    			"\"variables\": {" + 
-	    								"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + "," + 
-	    								"\"SERVICE_ID\":" + urlParams.SERVICE + 
-	    								"\"AMTS_ID\":" + urlParams.ID +
-	    							"}" + 
-	    		   "}"
+						"\"variables\": {" +
+								"\"AMTS_ID\":" + urlParams.ID +
+								"\"TERMIN_1_DATUM\":" + $( "#appointment1Selected" ).text().substring(0, 10) +
+								"\"TERMIN_1_SLOT\":" + $( "#appointment1Selected" ).text().substring(12, 20) +
+								"\"TERMIN_1_MA_ID\":" +$( "#appointmentconnectedemployee1" ).find("#EmployeeID").text() +
+								"\"TERMIN_2_DATUM\":" + $( "#appointment2Selected" ).text().substring(0, 10) +
+								"\"TERMIN_2_SLOT\":" + $( "#appointment2Selected" ).text().substring(12, 20) +
+								"\"TERMIN_2_MA_ID\":" + $( "#appointmentconnectedemployee2" ).find("#EmployeeID").text() +
+								"\"TERMIN_3_DATUM\":" + $( "#appointment3Selected" ).text().substring(0, 10) +
+								"\"TERMIN_3_SLOT\":" + $( "#appointment3Selected" ).text().substring(12, 20) +
+								"\"TERMIN_3_MA_ID\":" + $( "#appointmentconnectedemployee3" ).find("#EmployeeID").text() +
+							"}" + 
+					"}"
 		})
 		.fail(function(data){
 			errOcc = true;
 			
 	  		if ( console && console.log ) {
 	  	  		console.log( data );
-  	  			$( "#success-dataFound-anfrage" ).hide( "fast" );
-  	  			$( "#fail-summary-error" ).show('fast');
 	  	  	}
 		})
 		.done(function( data ) {
   			terminZusammenfassung = data.RESULT;
-  			
-  			moeglicheTermin_datumsliste = moeglicheTermine.reduce(function(keys, element){ 
-  			    for (key in element) {
-  			       keys.push(moment(key, "DD.MM.YYYY").format("DD.MM.YYYY"));
-  			    } 
-  			    return keys; 
-  			},[]);
-  			
-  			createPicker1();
-  			createPicker2();
-  			createPicker3();
+  			console.log(terminZusammenfassung);
 		})
 		.always(function() {
     		if(errOcc){

@@ -71,6 +71,19 @@ public class DataHandler implements JavaDelegate{
 																	 true);
 						status = STATUSENUM.OKAY;
 						break;
+					case TERMINZUSAMMENFASSUNG:
+						result = databaseHandler.getTerminZusammenfassung((long) databaseHandler.extractFieldFromPayload(id, "AMTS_ID"),
+								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_1_DATUM"),
+								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_1_SLOT"),
+								 										  (long) databaseHandler.extractFieldFromPayload(id, "TERMIN_1_MA_ID"),
+								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_2_DATUM"),
+								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_2_SLOT"),
+								 										  (long) databaseHandler.extractFieldFromPayload(id, "TERMIN_2_MA_ID"),
+								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_3_DATUM"),
+								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_3_SLOT"),
+								 										  (long) databaseHandler.extractFieldFromPayload(id, "TERMIN_3_MA_ID"));
+						status = STATUSENUM.OKAY;
+						break;
 					default:
 						throw new RuntimeException(String.format("Es existiert keine Operation des Typs '%s' für die Aktion '%s'.'" + 
 					                                             "\nDer Aufruf ist in der übergebenen Form ungültig und wird nicht bearbeitet!",

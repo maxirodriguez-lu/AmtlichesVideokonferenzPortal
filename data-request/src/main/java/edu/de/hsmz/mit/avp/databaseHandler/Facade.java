@@ -43,7 +43,6 @@ public class Facade {
 		String insertRequestSQL = "INSERT INTO PUBLIC.LOGGING (REQUEST_UUID, REQUEST_CALLERNAME, REQUEST_TIMESTAMP, REQUEST_TYPE, REQUEST_DATAOBJEKT, REQUEST_FULLURL, REQUEST_PAYLOAD, RESPONSE_STATUS) " +
 		        					      "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 		
-		
 		try(
 				Connection conn = getFachlicheDatenbank();	
 				PreparedStatement insertPreparedStatement = conn.prepareStatement(insertRequestSQL, Statement.RETURN_GENERATED_KEYS);
@@ -185,10 +184,6 @@ public class Facade {
 			
 			return results;
 		} catch (Exception e) {
-			JSONObject result = new JSONObject();
-			result.put("ERRORCODE", e.getMessage());
-			results.add(result);
-			
 	        throw new RuntimeException(e.getMessage());
 		} 
 	}
@@ -215,10 +210,6 @@ public class Facade {
 			
 			return results;
 		} catch (Exception e) {
-			JSONObject result = new JSONObject();
-			result.put("ERRORCODE", e.getMessage());
-			results.add(result);
-			
 	        throw new RuntimeException(e.getMessage());
 		} 
 	}
@@ -780,8 +771,6 @@ public class Facade {
 		}catch(java.text.ParseException e){
 	        throw new RuntimeException(e.getMessage());
 		}
-
-		
 		
 		return moeglicheTermine_global;
 	}
@@ -1009,5 +998,133 @@ public class Facade {
 		// TODO Add Logic here
 		return false;
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public JSONArray getTerminZusammenfassung(long AMTS_ID, 
+											  String TERMIN_1_DATUM,
+											  String TERMIN_1_SLOT, 
+											  long TERMIN_1_MA_ID, 
+											  String TERMIN_2_DATUM,
+											  String TERMIN_2_SLOT, 
+											  long TERMIN_2_MA_ID, 
+											  String TERMIN_3_DATUM,
+											  String TERMIN_3_SLOT, 
+											  long TERMIN_3_MA_ID) {
+		JSONArray result = new JSONArray();
+		JSONObject zusammenfassung = new JSONObject();
+		
+		//Amtsdaten auslesen
+		JSONObject amt = getAmtDaten(AMTS_ID);
+		zusammenfassung.put("AMT", amt);
+		
+		//Termin 1
+		JSONObject termin1 = new JSONObject();
+		
+		//DATUM & SLOT übernehmen
+		termin1.put("DATUM", TERMIN_1_DATUM);
+		termin1.put("SLOT", TERMIN_1_SLOT);
+		
+		//Mitarbeiterdaten auslesen und übernehmen
+		JSONObject mitarbeiter1 = getMitarbeiterDaten(TERMIN_1_MA_ID);
+		termin1.put("MITARBEITER", mitarbeiter1);
+		
+		zusammenfassung.put("TERMIN_1", termin1);
+		
+		
+		
+
+		//Termin 2
+		JSONObject termin2 = new JSONObject();
+		
+		//DATUM & SLOT übernehmen
+		termin2.put("DATUM", TERMIN_2_DATUM);
+		termin2.put("SLOT", TERMIN_2_SLOT);
+		
+		//Mitarbeiterdaten auslesen und übernehmen
+		JSONObject mitarbeiter2 = getMitarbeiterDaten(TERMIN_2_MA_ID);
+		termin1.put("MITARBEITER", mitarbeiter2);
+
+		zusammenfassung.put("TERMIN_2", termin2);
+		
+		
+
+		//Termin 3
+		JSONObject termin3 = new JSONObject();
+		
+		//DATUM & SLOT übernehmen
+		termin3.put("DATUM", TERMIN_3_DATUM);
+		termin3.put("SLOT", TERMIN_3_SLOT);
+		
+		//Mitarbeiterdaten auslesen und übernehmen
+		JSONObject mitarbeiter3 = getMitarbeiterDaten(TERMIN_3_MA_ID);
+		termin3.put("MITARBEITER", mitarbeiter3);
+		
+		zusammenfassung.put("TERMIN_3", termin3);
+		
+		
+		
+		//Ergebnistyp aufbauen
+		result.add(zusammenfassung);
+		
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private JSONObject getMitarbeiterDaten(long TERMIN_1_MA_ID) {		
+		String selectSQL = "SELECT ID, TYP, ANREDE, NAME, VORNAME, EMAIL, TELEFON, PROFILBILD FROM PUBLIC.BERATER WHERE ID = " + TERMIN_1_MA_ID + ";";
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			JSONObject mitarbeiter = new JSONObject();
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				
+				mitarbeiter.put("ID", dbResults.getLong(1));
+				mitarbeiter.put("TYP", dbResults.getString(2));
+				mitarbeiter.put("ANREDE", dbResults.getString(3));
+				mitarbeiter.put("NAME", dbResults.getString(4));
+				mitarbeiter.put("VORNAME", dbResults.getString(5));
+				mitarbeiter.put("EMAIL", dbResults.getString(6));
+				mitarbeiter.put("TELEFON", dbResults.getString(7));
+				mitarbeiter.put("PROFILBILD", dbResults.getString(8));
+			}
+			return mitarbeiter;
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+	}
+
+	@SuppressWarnings("unchecked")
+	private JSONObject getAmtDaten(long AMTS_ID) {
+		String selectSQL_Services = "SELECT ID, NAME, AMTSART_ID, ADRESSE, PLZ, ORT, MAIL, TELEFON, URL, PLZ_GEBIET_VON, PLZ_GEBIET_BIS FROM PUBLIC.AEMTER WHERE AMTSART_ID = " + AMTS_ID + ";";
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL_Services);
+		){
+			JSONObject amt = new JSONObject();
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				
+				amt.put("ID", dbResults.getLong(1));
+				amt.put("NAME", dbResults.getString(2));
+				amt.put("AMTSART_ID", dbResults.getLong(3));
+				amt.put("ADRESSE", dbResults.getString(4));
+				amt.put("PLZ", dbResults.getLong(5));
+				amt.put("ORT", dbResults.getString(6));
+				amt.put("MAIL", dbResults.getString(7));
+				amt.put("TELEFON", dbResults.getString(8));
+				amt.put("URL", dbResults.getString(9));
+				amt.put("PLZ_GEBIET_VON", dbResults.getLong(10));
+				amt.put("PLZ_GEBIET_BIS", dbResults.getLong(11));
+				
+				amt.put("LOGO", gibAmtsartZuAmt(AMTS_ID).get("LOGO"));
+			}
+			return amt;
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+	}
 }
