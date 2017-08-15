@@ -1022,6 +1022,8 @@ public class Facade {
 
 	@SuppressWarnings("unchecked")
 	public JSONArray getTerminZusammenfassung(long AMTS_ID, 
+											  long BERATUNGSGEBIET_ID,
+											  long SERVICE_ID,
 											  String TERMIN_1_DATUM,
 											  String TERMIN_1_SLOT, 
 											  long TERMIN_1_MA_ID, 
@@ -1033,6 +1035,12 @@ public class Facade {
 											  long TERMIN_3_MA_ID) {
 		JSONArray result = new JSONArray();
 		JSONObject zusammenfassung = new JSONObject();
+		
+		JSONArray beratunggebiet = getServicekategorieEinzeldaten(BERATUNGSGEBIET_ID, false);
+		zusammenfassung.put("BERATUNGSGEBIET", beratunggebiet.get(0));
+		
+		JSONArray service = getServiceEinzeldaten(BERATUNGSGEBIET_ID, SERVICE_ID, false, false);
+		zusammenfassung.put("SERVICE", service.get(0));
 		
 		//Amtsdaten auslesen
 		JSONObject amt = getAmtDaten(AMTS_ID);

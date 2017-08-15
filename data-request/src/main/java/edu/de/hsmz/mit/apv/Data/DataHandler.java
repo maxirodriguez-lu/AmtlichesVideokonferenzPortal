@@ -73,6 +73,8 @@ public class DataHandler implements JavaDelegate{
 						break;
 					case TERMINZUSAMMENFASSUNG:
 						result = databaseHandler.getTerminZusammenfassung((long) databaseHandler.extractFieldFromPayload(id, "AMTS_ID"),
+																		  (long) databaseHandler.extractFieldFromPayload(id, "BERATUNGSGEBIET_ID"),
+																		  (long) databaseHandler.extractFieldFromPayload(id, "SERVICE_ID"),
 								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_1_DATUM"),
 								 										  (String) databaseHandler.extractFieldFromPayload(id, "TERMIN_1_SLOT"),
 								 										  (long) databaseHandler.extractFieldFromPayload(id, "TERMIN_1_MA_ID"),

@@ -253,6 +253,9 @@
 	          <h1>Terminzusammenfassung</h1>
 	        </div>
 	        <p>Die Zusammenfassung ihres Termins. Bitte prüfen Sie, ob die angezeigten Angaben korrekt sind. Falls ja füllen Sie bitte das Formular aus und senden Sie die Anfrage ab ...</p>
+	       	<div id="SummaryContainer_Service" class="appointmentblock">
+	          <h2 class="summary-header"></h2>
+	        </div>
 	        <div id="SummaryContainer_Amt" class="appointmentblock">
 	          <h2 class="summary-header">Zuständiges Amt</h2>
 	          	<!-- Programmatische Befüllung: Amt_Summary -->
@@ -351,7 +354,6 @@
   </script>
   <script src="js/webflow.js" type="text/javascript"></script>
   <script>
-	var host = "localhost";
 	var moeglicheTermine;
 	var moeglicheTermin_datumsliste;
 	var terminZusammenfassung;
@@ -373,7 +375,7 @@
 	    	    "Accept": "application/json",
 	        	"Content-Type": "application/json"
 	    	},
-		  	url: "http://" + host + ":8080/requestHandler/rest/request/getData/MoeglicheTermine/?user=AVP_Frontend&userAuth=test",
+		  	url: "/requestHandler/rest/request/getData/MoeglicheTermine/?user=AVP_Frontend&userAuth=test",
 	    	type: "POST",
 	    	dataType: "json",
 	    	data: "{" + 
@@ -473,7 +475,7 @@
 		    	    "Accept": "application/json",
 		        	"Content-Type": "application/json"
 		    	},
-			  	url: "http://" + host + ":8080/requestHandler/rest/request/setData/TerminAnlegen/?user=AVP_Frontend&userAuth=test",
+			  	url: "/requestHandler/rest/request/setData/TerminAnlegen/?user=AVP_Frontend&userAuth=test",
 		    	type: "POST",
 		    	dataType: "json",
 		    	async: false,
@@ -556,12 +558,14 @@
 	    	    "Accept": "application/json",
 	        	"Content-Type": "application/json"
 	    	},
-		  	url: "http://" + host + ":8080/requestHandler/rest/request/getData/TerminZusammenfassung/?user=AVP_Frontend&userAuth=test",
+		  	url: "/requestHandler/rest/request/getData/TerminZusammenfassung/?user=AVP_Frontend&userAuth=test",
 	    	type: "POST",
 	    	dataType: "json",
 	    	data: "{" + 
 						"\"variables\": {" +
 								"\"AMTS_ID\":" + urlParams.ID + ", " +
+								"\"BERATUNGSGEBIET_ID\":" + urlParams.BERATUNGSGEBIET + ", " +
+								"\"SERVICE_ID\":" + urlParams.SERVICE + ", " +
 								"\"TERMIN_1_DATUM\":\"" + $( "#appointment1Selected" ).text().substring(0, 10) + "\", " +
 								"\"TERMIN_1_SLOT\":\"" + $( "#appointment1Selected" ).text().substring(12, 20) + "\", " +
 								"\"TERMIN_1_MA_ID\":" +$( "#appointmentconnectedemployee1" ).find("#EmployeeID").text() + ", " +
@@ -602,6 +606,8 @@
   	  						   terminZusammenfassung.AMT.LOGO,
   							   terminZusammenfassung.AMT.ID)
   				
+  					$( "#SummaryContainer_Service").find( "h2" ).text(terminZusammenfassung.BERATUNGSGEBIET.NAME + " / " + terminZusammenfassung.SERVICE.NAME);
+  							   
 	  				if(terminZusammenfassung.TERMIN_1 && terminZusammenfassung.TERMIN_1.MITARBEITER){
 	  					if(terminZusammenfassung.TERMIN_1.MITARBEITER.ID && 
 	  						terminZusammenfassung.TERMIN_1.MITARBEITER.VORNAME && 
