@@ -468,6 +468,8 @@
 			return;
 		}
 		
+		var ids = [];
+		var salts = [];
 		
 		for(var i = 1; i <= 3; i++){
 			$.ajax({
@@ -510,12 +512,8 @@
 	  			
 	  			if(result){
 	  				if(result.STATUS == "OKAY"){
-	  					var id = result.TERMIN_ID;
-	  					var salt = result.TERMIN_SALT;
-	  					
-	  					//TODO Appointmentrequest abschießen
-	  					
-	  					console.log(id + ": " + salt);
+	  					ids[i] = result.TERMIN_ID;
+	  					salts[i] = result.TERMIN_SALT;
 	  				}else if(result.STATUS == "ERROR"){
 	  					var msg = result.ERRORMESSAGE;
 
@@ -538,6 +536,65 @@
 				}
 		  	});
 			if(errOcc) break;
+		}
+		
+		if(!errOcc){
+			$.ajax({
+		    	headers: { 
+		    	    "Accept": "application/json",
+		        	"Content-Type": "application/json"
+		    	},
+			  	url: "/requestHandler/rest/request/appointment-start/?user=AVP_Frontend&userAuth=test",
+		    	type: "POST",
+		    	dataType: "json",
+		    	async: false,
+		    	data: "{" + 
+							"\"variables\": {" +
+									"\"APPOINTMENT_ID\":\"" + uuid + "\", " +
+									"\"TERMIN_1 \": {" +
+										"\"ID\":" + ids[1] + ", " +
+										"\"SALT\":\"" + salts[1] + "\"" +
+									"}, " + 
+									"\"TERMIN_2 \": {" +
+										"\"ID\":" + ids[2] + ", " +
+										"\"SALT\":\"" + salts[2] + "\"" +
+									"}, " + 
+									"\"TERMIN_3 \": {" +
+										"\"ID\":" + ids[3] + ", " +
+										"\"SALT\":\"" + salts[3] + "\"" +
+									"}" + 
+									
+								"}" + 
+						"}"
+			})
+			.fail(function(data){
+				errOcc = true;
+				
+		  		if ( console && console.log ) {
+		  	  		console.log( data );
+		  	  	}
+			})
+			.done(function( data ) {
+				errOcc = false;
+					
+	  			var result = data.RESULT[0];
+	  			console.log(result);
+			})
+			.always(function() {
+  	  			$( "#summaryContentContainer" ).hide('fast');
+  	  			$( "#submit-summary-button" ).hide('fast');
+  	  			
+	    		if(errOcc){
+	  	  			$( "#appointment-generation-successful" ).hide( "fast" );
+	  	  			
+  					$( '#errorMsgPlaceholder' ).empty();
+  					$( '#errorMsgPlaceholder' ).append("Fehler beim Start der Prozess-Engine! ");
+	  	  			
+	  	  			$( "#appointment-generation-failed" ).show('fast');
+	    		}else{
+	  	  			$( "#appointment-generation-successful" ).show( "fast" );
+				}
+		  	});
 		}
 	});
 	

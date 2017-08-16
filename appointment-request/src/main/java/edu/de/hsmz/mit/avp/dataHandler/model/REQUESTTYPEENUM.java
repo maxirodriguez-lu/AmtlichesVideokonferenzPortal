@@ -1,14 +1,6 @@
 package edu.de.hsmz.mit.avp.dataHandler.model;
 
 public enum REQUESTTYPEENUM {
-	SERVICEKATEGORIEN ("Servicekategorien"),
-	SERVICEKATEGORIEEINZELDATEN ("ServicekategorieEinzeldaten"),
-	SERVICEEINZELDATEN("ServiceEinzeldaten"),
-	INFORMATIONEINZELDATEN("InformationEinzeldaten"),
-	MOEGLICHETERMINE("MoeglicheTermine"),
-	TERMINANLEGEN("TerminAnlegen"),
-	BERATER ("Berater"),
-	TERMINZUSAMMENFASSUNG("TerminZusammenfassung"),
 	APPOINTMENT_START("Appointment-start");
 	
 	private String text;

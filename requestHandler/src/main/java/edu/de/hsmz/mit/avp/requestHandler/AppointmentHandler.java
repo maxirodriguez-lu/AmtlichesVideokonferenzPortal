@@ -13,11 +13,9 @@ import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import edu.de.hsmz.mit.avp.dataHandler.model.LoggedResponse;
 import edu.de.hsmz.mit.avp.dataHandler.model.REQUESTACTIONENUM;
 import edu.de.hsmz.mit.avp.dataHandler.model.REQUESTTYPEENUM;
 import edu.de.hsmz.mit.avp.dataHandler.model.Request;
-import edu.de.hsmz.mit.avp.dataHandler.model.STATUSENUM;
 import edu.de.hsmz.mit.avp.databaseHandler.Facade;
 import edu.de.hsmz.mit.avp.requestHandler.Errors.MissingParameterException;
 
@@ -29,6 +27,7 @@ public class AppointmentHandler {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public static Response handleAppointmentRequest(String objektTyp, UriInfo info, String payLoad){
 		Response resp = null;
 		
@@ -53,22 +52,19 @@ public class AppointmentHandler {
 			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("appointment-request");
 			
-			//Warten bis Prozess beendet ist
-			while(!instance.isEnded()){
-				Thread.sleep(100);
-			}
-			LoggedResponse loggedResponse = Facade.getReponse(id);
-			
 			//Ergebnisse aus der fachlichen Datenbank auslesen
-			if (loggedResponse != null && loggedResponse.getStatus() != null && loggedResponse.getStatus().equals(STATUSENUM.OKAY)){
-				resp = Response.status(200).entity(loggedResponse.getPayLoad().toJSONString()).build();
+			if (instance.getId() != null && instance.getId().length() > 0){
+				JSONObject res = new JSONObject();
+				res.put("STATUS", String.format("Prozess 'Appointment-request' mit ID '%s' gestartet ...", instance.getId()));
+				
+				resp = Response.status(200).entity(res.toJSONString()).build();
 			}
 			else{
-				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'appointment-request': \n" + loggedResponse.getPayLoad().toJSONString()).build();
+				resp = Response.status(404).entity("Fehler beim Aufruf des Services 'appointment-request': Keine Prozess-Instanz erzeugt!").build();
 			}
 			
 		}catch(Exception e){
-			resp = Response.status(404).entity("Fehler beim Aufruf des Services 'appointment-request'!").build();
+			resp = Response.status(404).entity("Fehler beim Aufruf des Services 'appointment-request': " + e.getMessage()).build();
 		}
 		
 		return resp;
