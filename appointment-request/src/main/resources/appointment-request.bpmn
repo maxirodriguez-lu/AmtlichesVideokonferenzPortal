@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.3.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.4.0">
   <bpmn:process id="appointment-request" name="Terminanfrage bearbeiten" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Terminanfrage eingegangen">
-      <bpmn:outgoing>SequenceFlow_09kjke1</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_15g8nau</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_09kjke1" sourceRef="StartEvent_1" targetRef="Task_1qmy4il" />
     <bpmn:endEvent id="EndEvent_0umr045" name="Terminanfrage bearbeitet">
       <bpmn:incoming>SequenceFlow_0kzaerk</bpmn:incoming>
     </bpmn:endEvent>
@@ -14,7 +13,7 @@
     </bpmn:userTask>
     <bpmn:sequenceFlow id="SequenceFlow_1g8wzdk" sourceRef="Task_1qmy4il" targetRef="Task_0110l9b" />
     <bpmn:serviceTask id="Task_1qmy4il" name="Sachbearbeiter ermitteln" camunda:class="edu.de.hsmz.mit.apv.Sachbearbeiter.SachbearbeiterDelegate">
-      <bpmn:incoming>SequenceFlow_09kjke1</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_15c2yc3</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1g8wzdk</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="ExclusiveGateway_1kj9llz" name="Termin angenommen?">
@@ -41,11 +40,11 @@
       <bpmn:incoming>SequenceFlow_1n9g92x</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0vac5b7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:intermediateCatchEvent id="EndEvent_1lqzrft" name="1 Minute">
-      <bpmn:incoming>SequenceFlow_0f8c4dr</bpmn:incoming>
+    <bpmn:intermediateCatchEvent id="EndEvent_1lqzrft" name="Terminstart&#10;">
+      <bpmn:incoming>SequenceFlow_0ksbi3a</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1n9g92x</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">${webExStartDate}</bpmn:timeDate>
+        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">${Konferenz_Zeitpunkt_Start}</bpmn:timeDate>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1n9g92x" sourceRef="EndEvent_1lqzrft" targetRef="Task_16g2e73" />
@@ -86,7 +85,7 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:incoming>SequenceFlow_08rp9la</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1xd01w9</bpmn:outgoing>
     </bpmn:sendTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0f8c4dr" sourceRef="Task_0f26l7w" targetRef="EndEvent_1lqzrft" />
+    <bpmn:sequenceFlow id="SequenceFlow_0f8c4dr" sourceRef="Task_0f26l7w" targetRef="IntermediateThrowEvent_07rs2yu" />
     <bpmn:sequenceFlow id="SequenceFlow_1xd01w9" sourceRef="Task_0hq7bqm" targetRef="Task_0f26l7w" />
     <bpmn:serviceTask id="ServiceTask_12n80ma" name="Absage senden">
       <bpmn:extensionElements>
@@ -143,26 +142,80 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:incoming>SequenceFlow_0vac5b7</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_070z0wi</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_15g8nau" sourceRef="StartEvent_1" targetRef="Task_0gveqdr" />
+    <bpmn:serviceTask id="Task_0du6mu6" name="Eingangsbestätigung senden">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="subject">Eingangsbestätigung Ihrer Terminanfrage</camunda:inputParameter>
+            <camunda:inputParameter name="text"><![CDATA[Sehr geehrte Damen und Herren,
+
+hiermit bestätigen wir den Eingang Ihrer Anfrage. Sobald diese vom zuständigen Sachbearbeiter bearbeitet wurde, erhalten Sie eine Bestätigung.
+
+Mit freundlichen Grüßen,
+Ihr Team des amtlichen Videokonferenzportals
+								
+]]></camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>mail-send</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1e2fd5l</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_15c2yc3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_0gveqdr" name="Daten auselesen" camunda:class="edu.de.hsmz.mit.apv.Sachbearbeiter.DatenLeseDelegate">
+      <bpmn:incoming>SequenceFlow_15g8nau</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1e2fd5l</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1e2fd5l" sourceRef="Task_0gveqdr" targetRef="Task_0du6mu6" />
+    <bpmn:sequenceFlow id="SequenceFlow_15c2yc3" sourceRef="Task_0du6mu6" targetRef="Task_1qmy4il" />
+    <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_07rs2yu" name="15 vor Start">
+      <bpmn:incoming>SequenceFlow_0f8c4dr</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1w2ustj</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">${Konferenz_Zeitpunkt_Erinnerung}</bpmn:timeDate>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask_0r35u8c" name="Erinnerung versenden">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="subject">Erinnerung zur angefragten Webkonferenz in 15 Minuten</camunda:inputParameter>
+            <camunda:inputParameter name="text">
+              <camunda:script scriptFormat="freemarker"><![CDATA[Sehr geehrte Damen und Herren,
+
+ihre Webkonferenz mit ${Assignee_Calc} beginnt in 15 Minuten nun. 
+
+Bitte bereiten Sie sich auf den Termin vor.
+
+Mit freundlichen Grüßen,
+Ihr Team des amtlichen Videokonferenzportals
+								]]></camunda:script>
+            </camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>mail-send</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1w2ustj</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0ksbi3a</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1w2ustj" sourceRef="IntermediateThrowEvent_07rs2yu" targetRef="ServiceTask_0r35u8c" />
+    <bpmn:sequenceFlow id="SequenceFlow_0ksbi3a" sourceRef="ServiceTask_0r35u8c" targetRef="EndEvent_1lqzrft" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="appointment-request">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="173" y="102" width="36" height="36" />
+        <dc:Bounds x="-118" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="154" y="138" width="74" height="25" />
+          <dc:Bounds x="-137" y="138" width="74" height="26" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_09kjke1_di" bpmnElement="SequenceFlow_09kjke1">
-        <di:waypoint xsi:type="dc:Point" x="209" y="120" />
-        <di:waypoint xsi:type="dc:Point" x="254" y="120" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="232" y="105" width="0" height="0" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_0umr045_di" bpmnElement="EndEvent_0umr045">
-        <dc:Bounds x="1561" y="102" width="36" height="36" />
+        <dc:Bounds x="1868" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1542" y="138" width="74" height="25" />
+          <dc:Bounds x="1849" y="138" width="74" height="25" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_07l52rl_di" bpmnElement="Task_0110l9b">
@@ -185,23 +238,23 @@ Ihr Team des amtlichen Videokonferenzportals
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_0tq2uo6_di" bpmnElement="ExclusiveGateway_0tq2uo6" isMarkerVisible="true">
-        <dc:Bounds x="1448" y="95" width="50" height="50" />
+        <dc:Bounds x="1755" y="95" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1365" y="107" width="74" height="25" />
+          <dc:Bounds x="1672" y="107" width="74" height="25" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0vac5b7_di" bpmnElement="SequenceFlow_0vac5b7">
-        <di:waypoint xsi:type="dc:Point" x="1051" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="1125" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1400" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1446" y="31" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1088" y="16" width="0" height="0" />
+          <dc:Bounds x="1423" y="16" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0kzaerk_di" bpmnElement="SequenceFlow_0kzaerk">
-        <di:waypoint xsi:type="dc:Point" x="1498" y="120" />
-        <di:waypoint xsi:type="dc:Point" x="1561" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="1805" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="1868" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1530" y="105" width="0" height="0" />
+          <dc:Bounds x="1837" y="105" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_124ihfp_di" bpmnElement="SequenceFlow_124ihfp">
@@ -223,19 +276,19 @@ Ihr Team des amtlichen Videokonferenzportals
         <dc:Bounds x="586" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0aitpds_di" bpmnElement="Task_16g2e73">
-        <dc:Bounds x="951" y="-9" width="100" height="80" />
+        <dc:Bounds x="1300" y="-9" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateCatchEvent_0nzdvlg_di" bpmnElement="EndEvent_1lqzrft">
-        <dc:Bounds x="880" y="13" width="36" height="36" />
+        <dc:Bounds x="1187" y="13" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="897" y="49" width="43" height="13" />
+          <dc:Bounds x="1198" y="49" width="55" height="13" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1n9g92x_di" bpmnElement="SequenceFlow_1n9g92x">
-        <di:waypoint xsi:type="dc:Point" x="916" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="951" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1223" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1300" y="31" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="934" y="16" width="0" height="0" />
+          <dc:Bounds x="1262" y="16" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_08rp9la_di" bpmnElement="SequenceFlow_08rp9la">
@@ -247,15 +300,15 @@ Ihr Team des amtlichen Videokonferenzportals
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_13712eo_di" bpmnElement="SequenceFlow_13712eo">
-        <di:waypoint xsi:type="dc:Point" x="1390" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="1473" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="1473" y="95" />
+        <di:waypoint xsi:type="dc:Point" x="1697" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1780" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1780" y="95" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1432" y="16" width="0" height="0" />
+          <dc:Bounds x="1739" y="16" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="UserTask_1fgvd62_di" bpmnElement="Task_0missf0">
-        <dc:Bounds x="1290" y="-9" width="100" height="80" />
+        <dc:Bounds x="1597" y="-9" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1aewrug_di" bpmnElement="Task_0f26l7w">
         <dc:Bounds x="731" y="-9" width="100" height="80" />
@@ -265,9 +318,9 @@ Ihr Team des amtlichen Videokonferenzportals
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0f8c4dr_di" bpmnElement="SequenceFlow_0f8c4dr">
         <di:waypoint xsi:type="dc:Point" x="831" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="880" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="949" y="31" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="856" y="6" width="0" height="0" />
+          <dc:Bounds x="890" y="16" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1xd01w9_di" bpmnElement="SequenceFlow_1xd01w9">
@@ -291,22 +344,72 @@ Ihr Team des amtlichen Videokonferenzportals
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0cxj511_di" bpmnElement="SequenceFlow_0cxj511">
         <di:waypoint xsi:type="dc:Point" x="831" y="210" />
-        <di:waypoint xsi:type="dc:Point" x="1473" y="210" />
-        <di:waypoint xsi:type="dc:Point" x="1473" y="145" />
+        <di:waypoint xsi:type="dc:Point" x="1780" y="210" />
+        <di:waypoint xsi:type="dc:Point" x="1780" y="145" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1152" y="195" width="0" height="0" />
+          <dc:Bounds x="1306" y="195" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_070z0wi_di" bpmnElement="SequenceFlow_070z0wi">
-        <di:waypoint xsi:type="dc:Point" x="1225" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="1290" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1546" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1597" y="31" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1258" y="16" width="0" height="0" />
+          <dc:Bounds x="1572" y="16" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_0ysfvbb_di" bpmnElement="Task_1ksq8fb">
-        <dc:Bounds x="1125" y="-9" width="100" height="80" />
+        <dc:Bounds x="1446" y="-9" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_15g8nau_di" bpmnElement="SequenceFlow_15g8nau">
+        <di:waypoint xsi:type="dc:Point" x="-82" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="-23" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-52" y="105" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1gzs4as_di" bpmnElement="Task_0du6mu6">
+        <dc:Bounds x="118" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_07i30it_di" bpmnElement="Task_0gveqdr">
+        <dc:Bounds x="-23" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1e2fd5l_di" bpmnElement="SequenceFlow_1e2fd5l">
+        <di:waypoint xsi:type="dc:Point" x="77" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="118" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="98" y="95" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_15c2yc3_di" bpmnElement="SequenceFlow_15c2yc3">
+        <di:waypoint xsi:type="dc:Point" x="218" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="254" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="236" y="95" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1lijrqt_di" bpmnElement="IntermediateThrowEvent_07rs2yu">
+        <dc:Bounds x="949" y="13" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="938" y="48.62234794908062" width="57" height="13" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0r35u8c_di" bpmnElement="ServiceTask_0r35u8c">
+        <dc:Bounds x="1036" y="-9" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1w2ustj_di" bpmnElement="SequenceFlow_1w2ustj">
+        <di:waypoint xsi:type="dc:Point" x="985" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1036" y="31" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1011" y="6" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ksbi3a_di" bpmnElement="SequenceFlow_0ksbi3a">
+        <di:waypoint xsi:type="dc:Point" x="1136" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1187" y="31" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1162" y="6" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

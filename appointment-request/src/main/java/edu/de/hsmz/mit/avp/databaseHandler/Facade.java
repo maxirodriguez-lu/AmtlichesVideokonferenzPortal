@@ -1,5 +1,6 @@
 package edu.de.hsmz.mit.avp.databaseHandler;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -177,6 +179,70 @@ public class Facade {
 			
 			return results;
 		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+	}
+	
+public ResultSet getTermine(String group_id) {
+		
+		String selectSQL = "SELECT KUNDE_EMAIL, KUNDE_ANREDE, KUNDE_VORNAME, KUNDE_NAME, BERATER_ID, DATUM, UHRZEIT FROM PUBLIC.TERMINE WHERE GROUP_ID = '" + group_id + "';";
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if (dbResults.first()) {
+				return dbResults;
+			}else{
+				return null;
+			}
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		} 
+	}
+
+	public Object extractFieldFromPayload(long id, String fieldName) {
+		String selectSQL = "SELECT REQUEST_ID, REQUEST_PAYLOAD FROM PUBLIC.LOGGING " +
+			      		   "WHERE REQUEST_ID = " + id + ";";
+	
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet results = selectPreparedStatement.executeQuery();
+			if (results.next()) {
+				
+				String payloadTxt = IOUtils.toString(results.getCharacterStream(2));
+				if(payloadTxt != null && payloadTxt.length() > 0){
+					JSONObject payload = (JSONObject) new JSONParser().parse(payloadTxt);
+					
+					if(payload.containsKey("variables")){
+						if(payload.get("variables") instanceof JSONObject){
+							JSONObject variables = (JSONObject) payload.get("variables");
+							if(variables.containsKey(fieldName)){
+								return variables.get(fieldName);
+							}else{
+					            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%s' konnte kein Eintrag '%s' gefunden werden!", id, fieldName));
+							}
+						}else{
+				            throw new SQLException(String.format("Illegaler Eintragstyp in den Variablen des Request-Payload des Eintrags mit ID '%s'!", id));
+						}
+					}else{
+			            throw new SQLException(String.format("Im Request-Payload des Eintrags mit ID '%s' konnte kein Eintrag 'variables' gefunden werden!", id));
+					}
+				}else{
+		            throw new SQLException(String.format("Request-Payload des Eintrags mit ID '%s' konnte nicht gelesen werden!", id));
+				}
+			}else {
+	            throw new SQLException("Datenauslesen fehlgeschlage, Daten fehlerhaft!");
+	    }
+	
+		} catch (SQLException e) {
+	        throw new RuntimeException(e.getMessage());
+		} catch (ParseException e) {
+	        throw new RuntimeException(String.format("Request-Payload des Eintrags mit ID '%s' ist korrupt!", id));
+		} catch (IOException e) {
 	        throw new RuntimeException(e.getMessage());
 		} 
 	}

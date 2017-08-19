@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.UUID;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -938,7 +939,13 @@ public class Facade {
 										    AMTSART_ID, 
 										    AMT_ID, 
 										    MITARBEITER_ID,	
-										    TERMIN_DATUMUNDUHRZEIT);
+										    TERMIN_DATUMUNDUHRZEIT,
+										    TERMIN_GROUP_ID,
+											KUNDEN_ANREDE,
+											KUNDEN_VORNAME,
+											KUNDEN_NAME,
+											KUNDEN_EMAIL,
+											ANFRAGE);
 			
 			if(termin != null && termin.get("ID") != null && termin.get("SALT") != null){
 				boolean terminIsFrei = checkTerminGegenMitarbeiterAmtDatum((long) termin.get("ID"), MITARBEITER_ID, AMT_ID, TERMIN_DATUMUNDUHRZEIT);
@@ -981,13 +988,55 @@ public class Facade {
 									long AMTSART_ID, 
 									long AMT_ID,
 									long MITARBEITER_ID, 
-									String TERMIN_DATUMUNDUHRZEIT) {
-		JSONObject result = new JSONObject();
-		result.put("ID", new Long("126316273").longValue());
-		result.put("SALT", "hjahsbdhjasd-ajsbdjbas-basjhdasbd");
-		// TODO Add Logic here
+									String TERMIN_DATUMUNDUHRZEIT, 
+									String TERMIN_GROUP_ID, 
+									String KUNDEN_ANREDE, 
+									String KUNDEN_VORNAME, 
+									String KUNDEN_NAME, 
+									String KUNDEN_EMAIL, 
+									String ANFRAGE) {
 		
-		return result;
+		
+		String insertRequestSQL = "INSERT INTO PUBLIC.TERMINE (GROUP_ID, DATUM, UHRZEIT, BERATER_ID, AMTS_ID, SERVICE_ID, KUNDE_ANREDE, KUNDE_VORNAME, KUNDE_NAME, KUNDE_EMAIL, ANFRAGE) " +
+									    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement insertPreparedStatement = conn.prepareStatement(insertRequestSQL, Statement.RETURN_GENERATED_KEYS);
+		){
+			Calendar day = new GregorianCalendar();
+			day.setTime(dateFormat_dateTime.parse(TERMIN_DATUMUNDUHRZEIT));
+			
+			insertPreparedStatement.setString(1, TERMIN_GROUP_ID);
+			insertPreparedStatement.setDate(2, new java.sql.Date(day.getTimeInMillis()));
+			insertPreparedStatement.setTime(3, new java.sql.Time(day.getTimeInMillis()));
+			insertPreparedStatement.setLong(4, MITARBEITER_ID);
+			insertPreparedStatement.setLong(5, AMT_ID);
+			insertPreparedStatement.setLong(6, SERVICE_ID);
+			insertPreparedStatement.setString(7, KUNDEN_ANREDE);
+			insertPreparedStatement.setString(8, KUNDEN_VORNAME);
+			insertPreparedStatement.setString(9, KUNDEN_NAME);
+			insertPreparedStatement.setString(10, KUNDEN_EMAIL);
+			insertPreparedStatement.setString(11, ANFRAGE);
+			
+			int affectedRows = insertPreparedStatement.executeUpdate();
+			if (affectedRows == 0) {
+				throw new SQLException("Datenanlage fehlgeschlage, Daten fehlerhaft!");
+			}
+
+			JSONObject result = new JSONObject();
+			ResultSet generatedKeys = insertPreparedStatement.getGeneratedKeys();
+			if (generatedKeys.next()) {
+				result.put("ID", generatedKeys.getLong(1));
+				result.put("SALT", UUID.randomUUID().toString());
+				
+				return result;
+			}else {
+				throw new SQLException("Datenanlage fehlgeschlage, Daten fehlerhaft!");
+			}	
+		}catch(Exception e){
+			throw new RuntimeException("Fehler beim Anlegen des Termin-Datensatzes: " + e.getMessage());
+		}
 	}
 
 	private boolean checkTerminGegenMitarbeiterAmtDatum(long TERMIN_ID, long MITARBEITER_ID, long AMT_ID, String tERMIN_DATUMUNDUHRZEIT) {
