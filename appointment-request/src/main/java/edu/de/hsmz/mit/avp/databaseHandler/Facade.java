@@ -15,6 +15,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -153,49 +154,30 @@ public class Facade {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public JSONArray getSachbearbeiter() {
-		
-		String selectSQL = "SELECT ID, NAME, VORNAME, EMAIL, TELEFON FROM PUBLIC.BERATER WHERE TYP = 'SACHBEARBEITER';";
-		JSONArray results = new JSONArray();
-		
-		try(
-			Connection conn = getFachlicheDatenbank();	
-			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
-		){
-			ResultSet dbResults = selectPreparedStatement.executeQuery();
-			while (dbResults.next()) {
-				JSONObject result = new JSONObject();
-				
-				result.put("ID", dbResults.getLong(1));
-				result.put("NACHNAME", dbResults.getString(2));
-				result.put("VORNAME", dbResults.getString(3));
-				result.put("NAME", dbResults.getString(3).substring(0, 1) + "." + dbResults.getString(2));
-				result.put("EMAIL", dbResults.getString(4));
-				result.put("TELEFON", dbResults.getString(5));
-				
-				results.add(result);
-			}
-			
-			return results;
-		} catch (Exception e) {
-	        throw new RuntimeException(e.getMessage());
-		} 
-	}
 	
-public ResultSet getTermine(String group_id) {
+	public void getTermineAndAddRetrievedDataToExecution(String group_id, DelegateExecution execution) {
 		
-		String selectSQL = "SELECT KUNDE_EMAIL, KUNDE_ANREDE, KUNDE_VORNAME, KUNDE_NAME, BERATER_ID, DATUM, UHRZEIT FROM PUBLIC.TERMINE WHERE GROUP_ID = '" + group_id + "';";
+		String selectSQL = "SELECT KUNDE_EMAIL, KUNDE_ANREDE, KUNDE_VORNAME, KUNDE_NAME, BERATER_ID, DATUM, UHRZEIT, ID, ANFRAGE, GROUP_ID FROM PUBLIC.TERMINE WHERE GROUP_ID = '" + group_id + "';";
 		
 		try(
 			Connection conn = getFachlicheDatenbank();	
 			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
 		){
 			ResultSet dbResults = selectPreparedStatement.executeQuery();
-			if (dbResults.first()) {
-				return dbResults;
-			}else{
-				return null;
+			for(int i = 1; dbResults.next(); i++){
+				
+				execution.setVariable("Kunde_Email", dbResults.getString(1));
+				execution.setVariable("Kunde_Anrede", dbResults.getString(2));
+				execution.setVariable("Kunde_Vorname", dbResults.getString(3));
+				execution.setVariable("Kunde_Nachname", dbResults.getString(4));
+				
+				execution.setVariable("Termin" + i + "_ID", dbResults.getString(8));
+				execution.setVariable("Termin" + i + "_Datum", dbResults.getString(6));
+				execution.setVariable("Termin" + i + "_Uhrzeit", dbResults.getString(7));
+				execution.setVariable("Termin" + i + "Sachbearbeiter", dbResults.getString(5));
+
+				execution.setVariable("Anfrage_Text", dbResults.getString(9));
+				execution.setVariable("Anfrage_ID", dbResults.getString(10));
 			}
 		} catch (Exception e) {
 	        throw new RuntimeException(e.getMessage());
@@ -245,5 +227,43 @@ public ResultSet getTermine(String group_id) {
 		} catch (IOException e) {
 	        throw new RuntimeException(e.getMessage());
 		} 
+	}
+
+	public String getTypZuBeraterID(String requestedUserId) {
+		
+		String selectSQL = "SELECT ID, TYP FROM PUBLIC.BERATER WHERE ID = " + requestedUserId + ";";
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if(dbResults.first()){
+				return dbResults.getString(2);
+			}else{
+				return "";
+			}
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	public String getCamundaUserZuBeraterID(String requestedUserId) {
+		
+		String selectSQL = "SELECT ID, CAMUNDA_USERNAME FROM PUBLIC.BERATER WHERE ID = " + requestedUserId + ";";
+		
+		try(
+			Connection conn = getFachlicheDatenbank();	
+			PreparedStatement selectPreparedStatement = conn.prepareStatement(selectSQL);
+		){
+			ResultSet dbResults = selectPreparedStatement.executeQuery();
+			if(dbResults.first()){
+				return dbResults.getString(2);
+			}else{
+				return "";
+			}
+		} catch (Exception e) {
+	        throw new RuntimeException(e.getMessage());
+		}
 	}
 }

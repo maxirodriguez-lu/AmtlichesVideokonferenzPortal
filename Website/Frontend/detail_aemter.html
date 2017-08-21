@@ -488,7 +488,7 @@
 									"\"AMTSART_ID\":" + urlParams.AMTSART_ID + ", " +
 									"\"AMT_ID\":" + urlParams.ID + ", " +
 									"\"MITARBEITER_ID\":" + terminZusammenfassung["TERMIN_" + i].MITARBEITER.ID + ", " +
-									"\"TERMIN_DATUMUNDUHRZEIT\":\"" + terminZusammenfassung.["TERMIN_" + i].DATUM + " " + terminZusammenfassung.["TERMIN_" + i].SLOT + "\", " +
+									"\"TERMIN_DATUMUNDUHRZEIT\":\"" + terminZusammenfassung["TERMIN_" + i].DATUM + " " + terminZusammenfassung["TERMIN_" + i].SLOT + "\", " +
 									"\"TERMIN_GROUP_ID\":\"" + uuid + "\", " +
 									"\"KUNDEN_ANREDE\":\"" + $( '#customer-data-anrede' ).val() + "\", " +
 									"\"KUNDEN_VORNAME\":\"" + $( '#customer-data-vorname' ).val() + "\", " +
@@ -547,7 +547,6 @@
 			  	url: "/requestHandler/rest/request/appointment-start/?user=AVP_Frontend&userAuth=test",
 		    	type: "POST",
 		    	dataType: "json",
-		    	async: false,
 		    	data: "{" + 
 							"\"variables\": {" +
 									"\"APPOINTMENT_ID\":\"" + uuid + "\", " +

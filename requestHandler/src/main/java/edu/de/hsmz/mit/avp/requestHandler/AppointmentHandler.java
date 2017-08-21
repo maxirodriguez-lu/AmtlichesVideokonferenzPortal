@@ -50,7 +50,7 @@ public class AppointmentHandler {
 			processParams.put("FachlicheID", id);
 			
 			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("appointment-request");
+			ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey("appointment-request", processParams);
 			
 			//Ergebnisse aus der fachlichen Datenbank auslesen
 			if (instance.getId() != null && instance.getId().length() > 0){

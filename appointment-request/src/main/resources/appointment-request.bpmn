@@ -7,7 +7,7 @@
     <bpmn:endEvent id="EndEvent_0umr045" name="Terminanfrage bearbeitet">
       <bpmn:incoming>SequenceFlow_0kzaerk</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="Task_0110l9b" name="Terminanfrage bearbeiten" camunda:formKey="embedded:app:forms/request-appointment-confirmationCancellation.html" camunda:assignee="${Assignee_Calc}" camunda:candidateGroups="Sachbearbeiter">
+    <bpmn:userTask id="Task_0110l9b" name="Terminanfrage bearbeiten" camunda:formKey="embedded:app:forms/request-appointment-confirmationCancellation.html" camunda:assignee="${Sachbearbeiter}" camunda:candidateGroups="Sachbearbeiter">
       <bpmn:incoming>SequenceFlow_1g8wzdk</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_124ihfp</bpmn:outgoing>
     </bpmn:userTask>
@@ -52,7 +52,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bestaetigung_annahme == 1}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_13712eo" sourceRef="Task_0missf0" targetRef="ExclusiveGateway_0tq2uo6" />
-    <bpmn:userTask id="Task_0missf0" name="Session beitreten" camunda:formKey="embedded:app:forms/request-meeting.html" camunda:assignee="${Assignee_Calc}" camunda:candidateGroups="Sachbearbeiter">
+    <bpmn:userTask id="Task_0missf0" name="Session beitreten" camunda:formKey="embedded:app:forms/request-meeting.html" camunda:assignee="${Sachbearbeiter}" camunda:candidateGroups="Sachbearbeiter">
       <bpmn:incoming>SequenceFlow_070z0wi</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_13712eo</bpmn:outgoing>
     </bpmn:userTask>
@@ -147,7 +147,7 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
-            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="to">${Kunde_Email}</camunda:inputParameter>
             <camunda:inputParameter name="subject">Eingangsbestätigung Ihrer Terminanfrage</camunda:inputParameter>
             <camunda:inputParameter name="text"><![CDATA[Sehr geehrte Damen und Herren,
 
@@ -164,7 +164,7 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:incoming>SequenceFlow_1e2fd5l</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_15c2yc3</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_0gveqdr" name="Daten auselesen" camunda:class="edu.de.hsmz.mit.apv.Sachbearbeiter.DatenLeseDelegate">
+    <bpmn:serviceTask id="Task_0gveqdr" name="Daten auselesen" camunda:class="edu.de.hsmz.mit.apv.Data.DatenLeseDelegate">
       <bpmn:incoming>SequenceFlow_15g8nau</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1e2fd5l</bpmn:outgoing>
     </bpmn:serviceTask>
