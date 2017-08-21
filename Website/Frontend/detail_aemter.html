@@ -340,7 +340,7 @@
 		
         <div class="buttoncontainer" data-ix="fade-in-bottom-page-loads">
         	<a id="submit-summary-button" class="button buttonwide" >Termin-Anfrage Senden</a>
-        	<a id="close-summary-button" class="all-caps hollow-button modalclosebutton" href="#">Schliesen</a>
+        	<a id="close-summary-button" class="all-caps hollow-button modalclosebutton" href="#">Schliessen</a>
         </div>
       </div>
     </div>
@@ -547,6 +547,7 @@
 			  	url: "/requestHandler/rest/request/appointment-start/?user=AVP_Frontend&userAuth=test",
 		    	type: "POST",
 		    	dataType: "json",
+		    	async: false,
 		    	data: "{" + 
 							"\"variables\": {" +
 									"\"APPOINTMENT_ID\":\"" + uuid + "\", " +

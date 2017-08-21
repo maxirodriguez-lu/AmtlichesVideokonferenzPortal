@@ -26,7 +26,6 @@
       <bpmn:incoming>SequenceFlow_0cxj511</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0kzaerk</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_0vac5b7" sourceRef="Task_16g2e73" targetRef="Task_1ksq8fb" />
     <bpmn:sequenceFlow id="SequenceFlow_0kzaerk" sourceRef="ExclusiveGateway_0tq2uo6" targetRef="EndEvent_0umr045" />
     <bpmn:sequenceFlow id="SequenceFlow_124ihfp" sourceRef="Task_0110l9b" targetRef="ExclusiveGateway_1kj9llz" />
     <bpmn:sequenceFlow id="SequenceFlow_04gjju0" name="Absage" sourceRef="ExclusiveGateway_1kj9llz" targetRef="Task_15e44lr">
@@ -49,7 +48,7 @@
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1n9g92x" sourceRef="EndEvent_1lqzrft" targetRef="Task_16g2e73" />
     <bpmn:sequenceFlow id="SequenceFlow_08rp9la" name="Annahme" sourceRef="ExclusiveGateway_1kj9llz" targetRef="Task_0hq7bqm">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bestaetigung_annahme == 1}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[${bestaetigung_annahme > 0}]]></bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_13712eo" sourceRef="Task_0missf0" targetRef="ExclusiveGateway_0tq2uo6" />
     <bpmn:userTask id="Task_0missf0" name="Session beitreten" camunda:formKey="embedded:app:forms/request-meeting.html" camunda:assignee="${Sachbearbeiter}" camunda:candidateGroups="Sachbearbeiter">
@@ -60,15 +59,20 @@
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
-            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="to">${Kunde_Email}</camunda:inputParameter>
             <camunda:inputParameter name="subject">Bestätigung des angefragten Termins zur Webkonferenz</camunda:inputParameter>
             <camunda:inputParameter name="text">
               <camunda:script scriptFormat="freemarker"><![CDATA[Sehr geehrte Damen und Herren,
 
-Ihre Anfrage wurde von der zuständigen Sachbearbeiterin / dem zuständigen Sachbearbeiter bestätigt.
+Ihre Anfrage wurde von der zuständigen Sachbearbeiterin / dem zuständigen Sachbearbeiter bearbeitet.
 
-Sie erhalten die Einladung zur Webkonferenz am ${webExStartDateString}.
-Die Einladung wird an die angegebene Adresse '${email}' versendet.
+Der folgende Termin wurde angenommen:
+
+${Konferenz_Zeitpunkt_Start}
+
+Sie erhalten die Einladung zur Webkonferenz am ${Konferenz_Zeitpunkt_Erinnerung}.
+
+Die Einladung wird an die angegebene Adresse '${Kunde_Email}' versendet.
 
 Mit freundlichen Grüßen,
 Ihr Team des amtlichen Videokonferenzportals
@@ -91,7 +95,7 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
-            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="to">${Kunde_Email}</camunda:inputParameter>
             <camunda:inputParameter name="subject">Absage des angefragten Termins zur Webkonferenz</camunda:inputParameter>
             <camunda:inputParameter name="text">
               <camunda:script scriptFormat="freemarker"><![CDATA[Sehr geehrte Damen und Herren,
@@ -118,12 +122,12 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
-            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="to">${Kunde_Email}</camunda:inputParameter>
             <camunda:inputParameter name="subject">Einladung zum angefragten Webkonferenz</camunda:inputParameter>
             <camunda:inputParameter name="text">
               <camunda:script scriptFormat="freemarker"><![CDATA[Sehr geehrte Damen und Herren,
 
-ihre Webkonferenz mit ${Assignee_Calc} beginnt nun. Sie können dem Meeting über folgende URL beitreten:
+ihre Webkonferenz mit ${Sachbearbeiter} beginnt nun. Sie können dem Meeting über folgende URL beitreten:
 
 	${Meeting_join_url}
 
@@ -181,12 +185,28 @@ Ihr Team des amtlichen Videokonferenzportals
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
-            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="to"><![CDATA[${
+
+
+
+
+
+
+
+
+
+
+Kunde_Email
+
+
+
+
+}]]></camunda:inputParameter>
             <camunda:inputParameter name="subject">Erinnerung zur angefragten Webkonferenz in 15 Minuten</camunda:inputParameter>
             <camunda:inputParameter name="text">
               <camunda:script scriptFormat="freemarker"><![CDATA[Sehr geehrte Damen und Herren,
 
-ihre Webkonferenz mit ${Assignee_Calc} beginnt in 15 Minuten nun. 
+ihre Webkonferenz mit ${Sachbearbeiter} beginnt in 15 Minuten nun. 
 
 Bitte bereiten Sie sich auf den Termin vor.
 
@@ -203,6 +223,7 @@ Ihr Team des amtlichen Videokonferenzportals
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1w2ustj" sourceRef="IntermediateThrowEvent_07rs2yu" targetRef="ServiceTask_0r35u8c" />
     <bpmn:sequenceFlow id="SequenceFlow_0ksbi3a" sourceRef="ServiceTask_0r35u8c" targetRef="EndEvent_1lqzrft" />
+    <bpmn:sequenceFlow id="SequenceFlow_0vac5b7" sourceRef="Task_16g2e73" targetRef="Task_1ksq8fb" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="appointment-request">
@@ -243,13 +264,6 @@ Ihr Team des amtlichen Videokonferenzportals
           <dc:Bounds x="1672" y="107" width="74" height="25" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0vac5b7_di" bpmnElement="SequenceFlow_0vac5b7">
-        <di:waypoint xsi:type="dc:Point" x="1400" y="31" />
-        <di:waypoint xsi:type="dc:Point" x="1446" y="31" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1423" y="16" width="0" height="0" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0kzaerk_di" bpmnElement="SequenceFlow_0kzaerk">
         <di:waypoint xsi:type="dc:Point" x="1805" y="120" />
         <di:waypoint xsi:type="dc:Point" x="1868" y="120" />
@@ -408,6 +422,13 @@ Ihr Team des amtlichen Videokonferenzportals
         <di:waypoint xsi:type="dc:Point" x="1187" y="31" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1162" y="6" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0vac5b7_di" bpmnElement="SequenceFlow_0vac5b7">
+        <di:waypoint xsi:type="dc:Point" x="1400" y="31" />
+        <di:waypoint xsi:type="dc:Point" x="1446" y="31" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1423" y="16" width="0" height="0" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>

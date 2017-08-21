@@ -12,8 +12,6 @@ public class CancellationMail implements JavaDelegate {
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
 		LOGGER.info("Sending Cancellation-Mail ... '\n");
-		LOGGER.info(">>> Mail-Adress: " + execution.getVariable("email") + " '\n");
-		LOGGER.info(">>> Employee responsible: " + execution.getVariable("Assignee_Calc") + " '\n");
 	}
 
 }

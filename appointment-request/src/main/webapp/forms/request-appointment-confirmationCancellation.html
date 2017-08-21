@@ -5,11 +5,161 @@
 			<input type="text" 
 				   class="form-control" 
 				   cam-variable-type="String"
-				   cam-variable-name="email" 
-				   name="email" 
+				   cam-variable-name="Kunde_Anrede" 
+				   name="Kunde_Anrede" 
+				   readonly/>
+				   
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Kunde_Vorname" 
+				   name="Kunde_Vorname" 
+				   readonly/>
+				   
+				   
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Kunde_Nachname" 
+				   name="Kunde_Nachname" 
 				   readonly/>
 		</div>
 	</div>
+	
+	<div class="control-group">
+		<label class="control-label">Anfrage</label>
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Anfrage_ID" 
+				   name="Anfrage_ID" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Anfrage_Text" 
+				   name="Anfrage_Text" 
+				   readonly/>
+		</div>
+	</div>
+	
+	
+	
+	<div class="control-group">
+		<label class="control-label">Wunschtermin</label>
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin1_ID" 
+				   name="Termin1_ID" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin1_Datum" 
+				   name="Termin1_Datum" 
+				   readonly/>
+				   
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin1_Uhrzeit" 
+				   name="Termin1_Datum" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin1Sachbearbeiter" 
+				   name="Termin1Sachbearbeiter" 
+				   readonly/>
+		</div>
+	</div>
+	
+	<div class="control-group">
+		<label class="control-label">Alternativtermin 1</label>
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin2_ID" 
+				   name="Termin2_ID" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin2_Datum" 
+				   name="Termin2_Datum" 
+				   readonly/>
+				   
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin2_Uhrzeit" 
+				   name="Termin2_Datum" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin2Sachbearbeiter" 
+				   name="Termin2Sachbearbeiter" 
+				   readonly/>
+		</div>
+	</div>
+	
+	<div class="control-group">
+		<label class="control-label">Alternativtermin 2</label>
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin3_ID" 
+				   name="Termin3_ID" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin3_Datum" 
+				   name="Termin3_Datum" 
+				   readonly/>
+				   
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin3_Uhrzeit" 
+				   name="Termin3_Datum" 
+				   readonly/>
+		</div>
+		
+		<div class="controls">
+			<input type="text" 
+				   class="form-control" 
+				   cam-variable-type="String"
+				   cam-variable-name="Termin3Sachbearbeiter" 
+				   name="Termin3Sachbearbeiter" 
+				   readonly/>
+		</div>
+	</div>
+	
 	<div class="form-group">
 		<label for="bestaetigung_annahme">Freigabe</label> 
 		<p></p>
@@ -18,7 +168,9 @@
 		<select
 			cam-variable-name="bestaetigung_annahme" cam-variable-type="Integer"
 			class="form-control" required>
-			<option value=1>Terminwunsch annehmen und bestätigen</option>
+			<option value=1>Wunschtermin annehmen und bestätigen</option>
+			<option value=2>Alternativtermin 1 annehmen und bestätigen</option>
+			<option value=3>Alternativtermin 2 annehmen und bestätigen</option>
 			<option value=0>Terminwunsch ablehenen und stornieren</option>
 		</select>
 	</div>

@@ -31,7 +31,7 @@ public class SessionStarter implements JavaDelegate {
 		
 		try{
 			LOGGER.info("> Ermittlung User ...");
-			String host_id = getUserIdForMailAdress((String) execution.getVariable("email"));
+			String host_id = getUserIdForMailAdress((String) execution.getVariable("Sachbearbeiter_Email"));
 			
 			LOGGER.info("> Starte Session ...");
 			HashMap<String, String> meetingAccessInformation = startMeeting(host_id);

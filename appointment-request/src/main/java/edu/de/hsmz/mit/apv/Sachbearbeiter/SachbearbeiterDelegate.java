@@ -42,7 +42,10 @@ public class SachbearbeiterDelegate implements JavaDelegate {
 			LOGGER.warning("Requested User not found - no User will be set. Task needs to be claimed!");
 		}
 		
-		if(selectedUser != null) execution.setVariable("Sachbearbeiter", selectedUser.getId());
+		if(selectedUser != null){
+			execution.setVariable("Sachbearbeiter", selectedUser.getId());
+			execution.setVariable("Sachbearbeiter_Email", selectedUser.getEmail());
+		}
 	}
 
 }
